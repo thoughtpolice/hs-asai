@@ -1,0 +1,67 @@
+name:                asai
+version:             0.0.0.0
+synopsis:            Delimited, answer-type-polymorphic continuations
+description:         Delimited, answer-type-polymorphic continuations
+homepage:            http://thoughtpolice.github.com/hs-asai
+bug-reports:         http://github.com/thoughtpolice/hs-asai/issues
+license:             MIT
+license-file:        LICENSE.txt
+copyright:           Copyright (c) Austin Seipp 2012
+author:              Austin Seipp <mad.one@gmail.com>
+maintainer:          Austin Seipp <mad.one@gmail.com>
+category:            Control
+build-type:          Simple
+cabal-version:       >=1.10
+tested-with:         GHC == 7.6.1
+
+extra-source-files:
+  AUTHORS.txt
+  README.md
+  CONTRIBUTING.md
+
+source-repository head
+  type: git
+  location: https://github.com/thoughtpolice/hs-asai.git
+
+library
+  exposed-modules:
+    Control.Monad.Cont.Delimited
+  build-depends:
+    base >= 4
+
+  hs-source-dirs:     src
+  ghc-options:        -Wall -O2 -funbox-strict-fields
+                      -fwarn-tabs
+  default-extensions: CPP
+  default-language:   Haskell2010
+
+-- test-suite properties
+--   hs-source-dirs: tests
+--   main-is:        Properties.hs
+--   type:           exitcode-stdio-1.0
+--
+--   build-depends:
+--     base           >= 4,
+--     bytestring,
+--     QuickCheck,
+--     hspec,
+--     asai
+--
+--   ghc-options:      -Wall -fno-cse -fno-warn-orphans
+--                     -threaded -rtsopts
+--   default-language: Haskell2010
+--
+-- benchmark bench1
+--   hs-source-dirs: bench
+--   main-is:        Bench1.hs
+--   type:           exitcode-stdio-1.0
+--
+--   build-depends:
+--     base           >= 4,
+--     bytestring,
+--     filepath,
+--     criterion,
+--     asai
+--
+--   ghc-options:      -Wall -fno-warn-orphans
+--   default-language: Haskell2010
