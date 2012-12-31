@@ -24,9 +24,7 @@ cabal-version:       >=1.10
 tested-with:         GHC == 7.6.1
 
 extra-source-files:
-  AUTHORS.txt
-  README.md
-  CONTRIBUTING.md
+  AUTHORS.txt README.md CONTRIBUTING.md CHANGELOG.md
 
 source-repository head
   type: git
