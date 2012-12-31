@@ -1,5 +1,5 @@
 -- |
--- Module      : Control.Delimited
+-- Module      : Control.Indexed.Monad
 -- Copyright   : (c) Oleg Kiselyov 2007-2012, (c) Austin Seipp 2012
 -- License     : MIT
 --
