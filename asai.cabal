@@ -2,7 +2,7 @@ name:                asai
 version:             0.0.0.0
 synopsis:            A minimal library for delimited continuations.
 description:
-  \"Genuine shift/reset in Haskell\". This library provides a monadic
+  \"Genuine shift/reset in Haskell.\" This library provides a monadic
   interface for delimited continuations with /answer type polymorphism/.
   .
   See "Control.Delimited.Tutorial" for a lengthy reference.
