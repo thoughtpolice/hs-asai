@@ -17,11 +17,14 @@ module Control.Monad.Cont.Delimited
        , (!>>=)
        , (!+>>)
          -- * Delimited continuations
-       , CC(..)
+       , CC
        , reset
        , shift
        , run
        ) where
+
+--------------------------------------------------------------------------------
+-- Parameterized monads.
 
 -- | Parameterized monads.
 class Monadish m where
@@ -30,14 +33,17 @@ class Monadish m where
   -- | Parameterized 'Prelude.>>='.
   bind :: m b g s -> (s -> m a b t) -> m a g t
 
--- | This newtype lifts any regular monad into a
--- parameterized monad.
+-- | This newtype lifts any regular monad into a parameterized monad.
 newtype MW m p q a = MW { unMW :: m a }
 
 instance Monad m => Monadish (MW m) where
   ret         x = MW (return x)
   bind (MW m) f = MW (m >>= unMW . f)
 
+-- | Infix synonym for 'bind'.
+(!>>=) :: Monadish m => m b g s -> (s -> m a b t) -> m a g t
+m !>>= f = bind m f
+infixl 1 !>>=
 
 -- | Defined as:
 --
@@ -46,12 +52,10 @@ instance Monad m => Monadish (MW m) where
 m1 !+>> m2 = bind m1 (const m2)
 --infixl 1 !+>>
 
--- | Infix synonym for 'bind'.
-(!>>=) :: Monadish m => m b g s -> (s -> m a b t) -> m a g t
-m !>>= f = bind m f
-infixl 1 !>>=
+--------------------------------------------------------------------------------
+-- Delimited continuations.
 
--- | The type of a delimited continuation.
+-- | The type of a delimited continuation, which is answer-type polymorphic.
 newtype CC a b t = CC { unCC :: (t -> a) -> b }
 
 instance Monadish CC where
