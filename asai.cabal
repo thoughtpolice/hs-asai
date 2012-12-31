@@ -1,7 +1,8 @@
 name:                asai
 version:             0.0.0.0
-synopsis:            Delimited, answer-type-polymorphic continuations
-description:         Delimited, answer-type-polymorphic continuations
+synopsis:            A minimal library for delimited continuations.
+description:
+  @asai@ provides TODO FIXME blah blah...
 homepage:            http://thoughtpolice.github.com/hs-asai
 bug-reports:         http://github.com/thoughtpolice/hs-asai/issues
 license:             MIT

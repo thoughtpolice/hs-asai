@@ -35,6 +35,8 @@ class Monad' m where
 -- | This newtype lifts any regular monad into a parameterized monad.
 newtype MW m p q a = MW { unMW :: m a }
 
+-- | This instances simply lifts regular instances of 'Monad'
+-- into instances of 'Monad''.
 instance Monad m => Monad' (MW m) where
   ret         x = MW (return x)
   bind (MW m) f = MW (m >>= unMW . f)
@@ -58,6 +60,7 @@ infixl 1 !+>>
 newtype Delim a b t
   = Delim { unDelim :: (t -> a) -> b }
 
+-- | Delimited continuations form a parameterized 'Monad''.
 instance Monad' Delim where
   ret x            = Delim (\k -> k x)
   bind (Delim f) h = Delim (\k -> f (\s -> unDelim (h s) k))
