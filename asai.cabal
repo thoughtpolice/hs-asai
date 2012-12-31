@@ -2,7 +2,10 @@ name:                asai
 version:             0.0.0.0
 synopsis:            A minimal library for delimited continuations.
 description:
-  @asai@ provides TODO FIXME blah blah...
+  \"Genuine shift/reset in Haskell\". This library provides a monadic
+  interface for delimited continuations with /answer type polymorphism/.
+  .
+  A tutorial or reference will come soon.
 homepage:            http://thoughtpolice.github.com/hs-asai
 bug-reports:         http://github.com/thoughtpolice/hs-asai/issues
 license:             MIT
@@ -37,6 +40,10 @@ library
   default-extensions: CPP
   default-language:   Haskell2010
 
+--
+-- Tests
+--
+
 test-suite properties
   hs-source-dirs: tests
   main-is:        Properties.hs
@@ -49,6 +56,21 @@ test-suite properties
   ghc-options:      -Wall -fno-cse -fno-warn-orphans
                     -threaded -rtsopts
   default-language: Haskell2010
+
+test-suite doctests
+  hs-source-dirs: tests
+  main-is:        doctests.hs
+  type:           exitcode-stdio-1.0
+  build-depends:
+    base           >= 4,
+    doctest
+  ghc-options:      -Wall -fno-cse -fno-warn-orphans
+                    -threaded -rtsopts
+  default-language: Haskell2010
+
+--
+-- Benchmarks
+--
 
 benchmark bench1
   hs-source-dirs: bench

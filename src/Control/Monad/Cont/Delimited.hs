@@ -26,6 +26,9 @@ module Control.Monad.Cont.Delimited
 -- Parameterized monads.
 
 -- | Parameterized monads.
+--
+-- Regular monads are automatically lifted into this class through a
+-- (hidden) newtype constructor.
 class Monad' m where
   -- | Parameterized 'Prelude.return'.
   ret  :: t -> m a a t
@@ -84,5 +87,8 @@ shift f = Delim (\k -> unDelim (f k) id)
 --}
 
 -- | Run a delimited computation.
+--
+-- >>> runDelim $ reset (shift (\_ -> ret "hello") !>>= \r -> ret (r + 1))
+-- "hello"
 runDelim :: Delim t t t -> t
 runDelim (Delim f) = f id
