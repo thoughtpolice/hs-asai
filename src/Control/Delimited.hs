@@ -34,9 +34,22 @@ import Control.Indexed.Monad
 
 -- | The type of a delimited continuation, which is answer-type polymorphic.
 --
--- Functions of type @a -> C s t b@ can be thought of as functions
--- of type @a / s -> b / t@, which means given an @a@ we return a @b@,
--- changing the answer type from @s@ to @t@.
+-- Functions of type @a -> 'Delim' s t b@ can be thought of as
+-- functions of type @a \/ s -> b \/ t@, which means given an @a@ we
+-- return a @b@, changing the /answer type/ of the continuation from
+-- @s@ to @t@.
+--
+-- If a 'Delim' does not capture the computation using one of the
+-- various @shift@ operators (or @shift@ does not change the answer
+-- type,) then the term is /polymorphic/ in the answer type.
+--
+-- >>> :t runDelim $ reset $ shift2 ret !>>= \r -> ret (r + (1 :: Int))
+-- runDelim $ reset $ shift2 ret !>>= \r -> ret (r + (1 :: Int))
+--   :: Int -> forall a'. Delim a' a' Int
+--
+-- Note how the quantified variable @a'@ is both the input and output
+-- answer type: thus, it cannot change from what is (in this case, the
+-- answer type of the enclosing 'reset' is 'Int'.)
 newtype Delim s t b
   = Delim { unDelim :: (b -> s) -> t }
 
