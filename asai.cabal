@@ -7,6 +7,8 @@ description:
   /polymorphism/.  It is the work of Oleg Kiselyov, and is named in
   honor of Kenichi Asai.
   .
+  To use this library, you should import "Control.Delimited".
+  .
   See "Control.Delimited.Tutorial" for a lengthy reference.
 homepage:            http://thoughtpolice.github.com/hs-asai
 bug-reports:         http://github.com/thoughtpolice/hs-asai/issues
@@ -34,6 +36,7 @@ library
   exposed-modules:
     Control.Delimited
     Control.Delimited.Tutorial
+    Control.Indexed.Monad
   build-depends:
     base >= 4
 
