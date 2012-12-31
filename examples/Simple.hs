@@ -1,15 +1,20 @@
 {-# LANGUAGE RebindableSyntax #-}
 module Simple where
-import Prelude (Int, fromInteger, Show(..), (.), ($), (+))
-import qualified Prelude
+import Prelude hiding (return, fail, (>>=), (=<<))
 import Control.Monad.Cont.Delimited
 
 -- Aspects of RebindableSyntax
 
 m >>= f  = m !>>= f
 return x = ret x
-fail x   = Prelude.error x
+fail x   = error x
 f =<< m  = m !>>= f
+
+-- Test of compatibility with Prelude
+
+io1 :: IO ()
+io1 = do
+  putStrLn "hi!"
 
 -- Simple test of answer type modification
 
