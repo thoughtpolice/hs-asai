@@ -19,9 +19,9 @@ module Control.Delimited
        , reset     -- :: Delim s t s -> Delim s' s' t
 
          -- ** A family of shift operators
-       , shift0    --
-       , shift1    --
-       , shift2    --
+       , shift0    -- :: ((b -> s) -> t) -> Delim s t b
+       , shift1    -- :: ((b -> s) -> Delim a t a) -> Delim s t b
+       , shift2    -- :: ((b -> forall a'.  Delim a' a' s) -> Delim a t a) -> Delim s t b
 
          -- ** Executing delimited computations
        , runDelim  -- :: Delim t t t -> t
