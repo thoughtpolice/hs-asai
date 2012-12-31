@@ -1,6 +1,6 @@
 {-# LANGUAGE RebindableSyntax #-}
 module Simple where
-import Prelude (Int, fromInteger, Show(..), (.), ($))
+import Prelude (Int, fromInteger, Show(..), (.), ($), (+))
 import qualified Prelude
 import Control.Monad.Cont.Delimited
 
@@ -10,6 +10,21 @@ m >>= f  = m !>>= f
 return x = ret x
 fail x   = Prelude.error x
 f =<< m  = m !>>= f
+
+-- Simple test of answer type modification
+
+ans1 = run $ reset $ do
+  r <- shift (\_ -> return "hello")
+  return (r + 1)
+-- This is equivalent to the OchaCaml term:
+--   reset (fun () -> 1 + shift (fun _ -> "hello")) ;;
+
+ans2 = run $ do
+  r <- reset $ do
+    x <- shift return
+    return (x + 1)
+  return (r 5)
+--   reset (fun () -> 1 + shift (fun k -> k)) ;;
 
 -- Append example, with monadic syntax
 
