@@ -18,6 +18,7 @@ module Control.Delimited
        , reset     -- :: Delim s t s -> Delim a a t
        , shift     -- :: ((t -> a) -> Delim s b s) -> Delim a b t
        , runDelim  -- :: Delim t t t -> t
+
          -- * Re-exports for convenience
        , module Control.Indexed.Monad
        ) where
