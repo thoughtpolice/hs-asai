@@ -5,3 +5,8 @@ Original author:
 Maintainer:
 
   Austin Seipp <mad [dot] one [@at] gmail [dot] com>
+
+Thanks go to:
+
+  Leon P Smith
+

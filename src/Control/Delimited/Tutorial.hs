@@ -39,7 +39,7 @@ f =<< m  = m !>>= f
 
 Lorem ipsum...
 
->>> runDelim $ reset $ (shift (\_ -> return "hello") >>= \r -> return (r + 1))
+>>> runDelim $ reset $ (shift1 (\_ -> return "hello") >>= \r -> return (r + 1))
 "hello"
 
 -}

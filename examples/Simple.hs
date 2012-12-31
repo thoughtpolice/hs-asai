@@ -20,20 +20,20 @@ io1 = do
 
 ans1 :: String
 ans1 = runDelim $ reset $ do
-  r <- shift (\_ -> return "hello")
+  r <- shift1 (\_ -> return "hello")
   return (r + 1)
 -- This is equivalent to the OchaCaml term:
 --   reset (fun () -> 1 + shift (fun _ -> "hello")) ;;
 
 ans1' :: String
 ans1' = runDelim $ reset $ do
-  r <- shift' (\_ -> return "hello")
+  r <- shift2 (\_ -> return "hello")
   return (r + 1)
 
 ans2 :: Int
 ans2 = runDelim $ do
   r <- reset $ do
-    x <- shift (\k -> return k)
+    x <- shift1 (\k -> return k)
     return (x + 1)
   return (r 5)
 -- In OchaCaml:
@@ -43,7 +43,7 @@ ans2 = runDelim $ do
 ans2' :: Int
 ans2' = runDelim $ do
   r <- reset $ do
-    x <- shift' (\k -> return k)
+    x <- shift2 (\k -> return k)
     return (x + (1 :: Int))
   -- The type of 'r' is:
   --
@@ -55,7 +55,7 @@ ans2' = runDelim $ do
 -- Append example, with monadic syntax
 
 appnd :: Monad' m => [a] -> Delim b ([a] -> m a' a' b) [a]
-appnd []       = shift (\k -> return (return . k))
+appnd []       = shift1 (\k -> return (return . k))
 appnd (a:rest) = do
   r <- appnd rest
   return (a:r)
@@ -68,9 +68,9 @@ testAppnd = runDelim $ do
 -- Visitors/cursors, with monadic syntax
 
 visit :: [a] -> Delim b [b] [a]
-visit []       = shift (\_ -> return [])
+visit []       = shift1 (\_ -> return [])
 visit (a:rest) = do
-  r <- shift (\k -> do
+  r <- shift1 (\k -> do
                     b <- return (k [])
                     c <- reset ((return . k) =<< visit rest)
                     return (b:c))
