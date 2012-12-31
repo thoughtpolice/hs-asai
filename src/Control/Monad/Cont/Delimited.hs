@@ -78,7 +78,7 @@ shift f = Delim (\k -> unDelim (f $ \t -> ret (k t)) id)
 
 {-- Haskell-98 'shift' definition. -}
 -- | Clear the current continuation and invoke our handler with it bound
--- as a paramter.
+-- as a parameter.
 shift :: ((t -> a) -> Delim s b s) -> Delim a b t
 shift f = Delim (\k -> unDelim (f k) id)
 --}
