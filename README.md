@@ -1,5 +1,7 @@
 # Delimited, answer-type-polymorphic continuations for Haskell.
 
+[![Build Status](https://secure.travis-ci.org/thoughtpolice/hs-asai.png?branch=master)](http://travis-ci.org/thoughtpolice/hs-asai)
+
 This package provides delimited continuations that are [answer-type
 polymorphic][atp]; the original formulation was [done by Oleg
 Kiselyov][oleg].
