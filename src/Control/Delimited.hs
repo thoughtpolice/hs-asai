@@ -16,9 +16,9 @@
 module Control.Delimited
        ( -- * Delimited continuations
          Delim     -- :: * -> * -> * -> *
-       , reset     -- :: Delim s t s -> Delim a a t
-       , shift     -- :: ((t -> a) -> Delim s b s) -> Delim a b t
-       , shift'    -- :: ((t -> forall t' -> Delim t' t' a) -> Delim s b s) -> Delim a b t
+       , reset     -- :: Delim s t s -> Delim s' s' t
+       , shift     -- :: ((b -> s) -> Delim s t s) -> Delim s t b
+       , shift'    -- :: ((b -> forall t'. Delim t' t' s) -> Delim s t s) -> Delim s t b
        , runDelim  -- :: Delim t t t -> t
 
          -- * Re-exports for convenience
@@ -31,8 +31,12 @@ import Control.Indexed.Monad
 -- Delimited continuations.
 
 -- | The type of a delimited continuation, which is answer-type polymorphic.
-newtype Delim a b t
-  = Delim { unDelim :: (t -> a) -> b }
+--
+-- Functions of type @a -> C s t b@ can be thought of as functions
+-- of type @a / s -> b / t@, which means given an @a@ we return a @b@,
+-- changing the answer type from @s@ to @t@.
+newtype Delim s t b
+  = Delim { unDelim :: (b -> s) -> t }
 
 -- | Delimited continuations form a parameterized 'Monad''.
 instance Monad' Delim where
@@ -40,25 +44,23 @@ instance Monad' Delim where
   bind (Delim f) h = Delim (\k -> f (\s -> unDelim (h s) k))
 
 -- | Delimit a computation.
-reset :: Delim s t s -> Delim a a t
+reset :: Delim s t s -> Delim s' s' t
 reset (Delim f) = Delim (\k -> k (f id))
 
-{-- Haskell-98 'shift' definition. -}
 -- | Clear the current continuation and invoke our handler with it
 -- bound as a parameter.
-shift :: ((t -> a) -> Delim s b s) -> Delim a b t
+shift :: ((b -> s) -> Delim s t s) -> Delim s t b
 shift f = Delim (\k -> unDelim (f k) id)
---}
+{- Haskell-98 'shift' definition. -}
 
-{-- Rank-2 based 'shift' definition. -}
 -- | Clear the current continuation and invoke our handler with it
 -- bound as a paramter.
 --
 -- This definition of @shift@ uses Rank-2 types to ensure the answer
 -- type is in fact polymorphic.
-shift' :: ((t -> forall t'. Delim t' t' a) -> Delim s b s) -> Delim a b t
+shift' :: ((b -> forall t'. Delim t' t' s) -> Delim s t s) -> Delim s t b
 shift' f = Delim (\k -> unDelim (f $ \t -> ret (k t)) id)
---}
+{- Rank-2 based 'shift' definition. -}
 
 -- | Run a delimited computation.
 runDelim :: Delim t t t -> t
