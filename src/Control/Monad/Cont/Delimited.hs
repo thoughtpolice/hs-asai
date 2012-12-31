@@ -62,10 +62,19 @@ instance Monadish CC where
 reset :: CC s t s -> CC a a t
 reset (CC f) = CC (\k -> k (f id))
 
+{-- Rank-2 based 'shift' definition.
 -- | Clear the current continuation and invoke our handler with it bound
 -- as a paramter.
 shift :: ((t -> forall t'. CC t' t' a) -> CC s b s) -> CC a b t
 shift f = CC (\k -> unCC (f $ \t -> ret (k t)) id)
+--}
+
+{-- Haskell-98 'shift' definition. -}
+-- | Clear the current continuation and invoke our handler with it bound
+-- as a paramter.
+shift :: ((tau -> a) -> CC s b s) -> CC a b tau
+shift f = CC (\k -> unCC (f k) id)
+--}
 
 -- | Run a delimited computation.
 run :: CC t t t -> t
