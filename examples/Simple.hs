@@ -33,7 +33,7 @@ ans1' = runDelim $ reset $ do
 ans2 :: Int
 ans2 = runDelim $ do
   r <- reset $ do
-    x <- shift (\k  -> return k)
+    x <- shift (\k -> return k)
     return (x + 1)
   return (r 5)
 -- In OchaCaml:
