@@ -18,13 +18,13 @@ io1 = do
 
 -- Simple test of answer type modification
 
-ans1 = run $ reset $ do
+ans1 = runDelim $ reset $ do
   r <- shift (\_ -> return "hello")
   return (r + 1)
 -- This is equivalent to the OchaCaml term:
 --   reset (fun () -> 1 + shift (fun _ -> "hello")) ;;
 
-ans2 = run $ do
+ans2 = runDelim $ do
   r <- reset $ do
     x <- shift return
     return (x + 1)
@@ -38,7 +38,7 @@ appnd (a:rest) = do
   r <- appnd rest
   return (a:r)
 
-testAppnd = run $ do
+testAppnd = runDelim $ do
   f <- reset (appnd [1,2,3])
   f [4,5,6] -- [1,2,3,4,5,6]
 
@@ -53,5 +53,5 @@ visit (a:rest) = do
   return (a:r)
 
 
-testVisit = run $ reset (visit [1,2,3])
+testVisit = runDelim $ reset (visit [1,2,3])
 -- [[1],[1,2],[1,2,3]]
