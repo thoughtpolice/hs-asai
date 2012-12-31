@@ -76,7 +76,7 @@ shift f = CC (\k -> unCC (f $ \t -> ret (k t)) id)
 {-- Haskell-98 'shift' definition. -}
 -- | Clear the current continuation and invoke our handler with it bound
 -- as a paramter.
-shift :: ((tau -> a) -> CC s b s) -> CC a b tau
+shift :: ((t -> a) -> CC s b s) -> CC a b t
 shift f = CC (\k -> unCC (f k) id)
 --}
 
