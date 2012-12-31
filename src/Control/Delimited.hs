@@ -7,7 +7,9 @@
 -- Stability   : experimental
 -- Portability : portable
 --
--- Delimited, answer-type-polymorphic continuations.
+-- Delimited continuations featuring answer-type polymorphism.
+--
+-- There is a tutorial available in "Control.Delimited.Tutorial".
 --
 module Control.Delimited
        ( -- * Parameterized monads
@@ -86,8 +88,5 @@ shift f = Delim (\k -> unDelim (f k) id)
 --}
 
 -- | Run a delimited computation.
---
--- >>> runDelim $ reset (shift (\_ -> ret "hello") !>>= \r -> ret (r + 1))
--- "hello"
 runDelim :: Delim t t t -> t
 runDelim (Delim f) = f id

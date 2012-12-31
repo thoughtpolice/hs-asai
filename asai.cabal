@@ -5,7 +5,7 @@ description:
   \"Genuine shift/reset in Haskell\". This library provides a monadic
   interface for delimited continuations with /answer type polymorphism/.
   .
-  A tutorial or reference will come soon.
+  See "Control.Delimited.Tutorial" for a lengthy reference.
 homepage:            http://thoughtpolice.github.com/hs-asai
 bug-reports:         http://github.com/thoughtpolice/hs-asai/issues
 license:             MIT
@@ -31,6 +31,7 @@ source-repository head
 library
   exposed-modules:
     Control.Delimited
+    Control.Delimited.Tutorial
   build-depends:
     base >= 4
 
