@@ -17,8 +17,11 @@ module Control.Delimited.Tutorial
        ( -- * Introduction
          -- $intro
 
-         -- * Notes on @do@-notation
+         -- * Using @do@-notation
          -- $donotation
+
+         -- * Other notes
+         -- $othernotes
 
          -- * References
          -- $refs
@@ -46,7 +49,50 @@ Lorem ipsum...
 
 {- $donotation
 
-Lorem ipsum...
+It's possible to use GHC's @RebindableSyntax@ extension to re-define
+@do@ notation to use the 'Monad'' type class.
+
+Begin your module by hiding the regular 'Monad' methods, and then
+redefine 'Prelude.>>=' and 'Prelude.return'. Feel free to redefine
+other operators too. Here's an example (you'll need to fix the
+@LANGUAGE@ pragma yourself on the first line, since Haddock eats it
+otherwise):
+
+> [-# LANGUAGE RebindableSyntax #-]
+> module Foo where
+> import Prelude hiding (return, fail, (>>=), (=<<))
+> import Control.Delimited
+>
+> -- Aspects of RebindableSyntax
+> m >>= f  = m !>>= f
+> return x = ret x
+> f =<< m  = m !>>= f
+>
+> -- Now use 'do' notation instead of the indexed bind/return
+> -- functions.
+>
+> io1 :: IO ()
+> io1 = do
+>   putStrLn "hi!"
+>
+> test1 :: String
+> test1 = runDelim $ reset $ do
+>   r <- shift1 (\_ -> return "hello")
+>   return (r + 1)
+> -- This is equivalent to the OchaCaml term:
+> --   reset (fun () -> 1 + shift (fun _ -> "hello")) ;;
+
+See @examples/Simple.hs@ (included in the distribution) for several
+more examples.
+
+-}
+
+{- $othernotes
+
+This package requires GHC's @RankNTypes@ extension, as it uses it for
+the definition of 'Control.Delimited.shift2'. The original
+implementation by Kiselyov is Haskell98. You do not need to enable
+@RankNTypes@ to use this package.
 
 -}
 
