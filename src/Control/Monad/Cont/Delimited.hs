@@ -13,7 +13,6 @@
 module Control.Monad.Cont.Delimited
        ( -- * Parameterized monads
          Monadish(..)
-       , MW(..)
        , (!>>=)
        , (!+>>)
          -- * Delimited continuations
