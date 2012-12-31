@@ -41,7 +41,6 @@ test-suite properties
   type:           exitcode-stdio-1.0
   build-depends:
     base           >= 4,
-    bytestring,
     QuickCheck,
     hspec,
     asai
