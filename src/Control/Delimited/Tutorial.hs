@@ -16,6 +16,8 @@ module Control.Delimited.Tutorial
        ( -- * Introduction
          -- $intro
 
+         -- * References
+         -- $refs
        ) where
 import Control.Delimited
 
@@ -25,5 +27,18 @@ Lorem ipsum...
 
 >>> runDelim $ reset (shift (\_ -> ret "hello") !>>= \r -> ret (r + 1))
 "hello"
+
+-}
+
+{- $refs
+
+  * /Polymorphic Delimited Continuations/, by Asai, Kameyama in /APLAS '07/:
+    <http://logic.cs.tsukuba.ac.jp/~kam/paper/aplas07.pdf>
+
+  * /Genuine shift\reset in Haskell98/, by Kiselyov, on /haskell-cafe/:
+    <http://okmij.org/ftp/continuations/implementations.html#genuine-shift>
+
+  * /Introduction to programming with shift and reset/, by Kiselyov, Asai, in /CW2011/:
+    <http://okmij.org/ftp/continuations/index.html#tutorial>
 
 -}
