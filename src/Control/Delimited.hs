@@ -49,7 +49,9 @@ import Control.Indexed.Monad
 --
 -- Note how the quantified variable @a'@ is both the input and output
 -- answer type: thus, it cannot change from what is (in this case, the
--- answer type of the enclosing 'reset' is 'Int'.)
+-- answer type of the enclosing 'reset' is 'Int'.) We use 'shift2'
+-- here, which uses rank-2 typing to ensure the type variable does not
+-- \'escape\', much like the @ST@ monad.
 newtype Delim s t b
   = Delim { unDelim :: (b -> s) -> t }
 
