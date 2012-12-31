@@ -1,3 +1,4 @@
+{-# LANGUAGE RankNTypes #-}
 -- |
 -- Module      : Control.Delimited
 -- Copyright   : (c) Oleg Kiselyov 2007-2012, (c) Austin Seipp 2012
@@ -5,7 +6,7 @@
 --
 -- Maintainer  : mad.one@gmail.com
 -- Stability   : experimental
--- Portability : portable
+-- Portability : Rank-2 types required
 --
 -- Delimited continuations featuring answer-type polymorphism, via
 -- parameterized monads.
@@ -17,6 +18,7 @@ module Control.Delimited
          Delim     -- :: * -> * -> * -> *
        , reset     -- :: Delim s t s -> Delim a a t
        , shift     -- :: ((t -> a) -> Delim s b s) -> Delim a b t
+       , shift'    -- :: ((t -> forall t' -> Delim t' t' a) -> Delim s b s) -> Delim a b t
        , runDelim  -- :: Delim t t t -> t
 
          -- * Re-exports for convenience
@@ -41,18 +43,21 @@ instance Monad' Delim where
 reset :: Delim s t s -> Delim a a t
 reset (Delim f) = Delim (\k -> k (f id))
 
-{-- Rank-2 based 'shift' definition.
--- | Clear the current continuation and invoke our handler with it bound
--- as a paramter.
-shift :: ((t -> forall t'. Delim t' t' a) -> Delim s b s) -> Delim a b t
-shift f = Delim (\k -> unDelim (f $ \t -> ret (k t)) id)
---}
-
 {-- Haskell-98 'shift' definition. -}
--- | Clear the current continuation and invoke our handler with it bound
--- as a parameter.
+-- | Clear the current continuation and invoke our handler with it
+-- bound as a parameter.
 shift :: ((t -> a) -> Delim s b s) -> Delim a b t
 shift f = Delim (\k -> unDelim (f k) id)
+--}
+
+{-- Rank-2 based 'shift' definition. -}
+-- | Clear the current continuation and invoke our handler with it
+-- bound as a paramter.
+--
+-- This definition of @shift@ uses Rank-2 types to ensure the answer
+-- type is in fact polymorphic.
+shift' :: ((t -> forall t'. Delim t' t' a) -> Delim s b s) -> Delim a b t
+shift' f = Delim (\k -> unDelim (f $ \t -> ret (k t)) id)
 --}
 
 -- | Run a delimited computation.
