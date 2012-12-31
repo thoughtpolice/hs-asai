@@ -1,4 +1,3 @@
-{-# LANGUAGE RankNTypes #-}
 -- |
 -- Module      : Control.Monad.Cont.Delimited
 -- Copyright   : (c) Oleg Kiselyov 2007-2012, (c) Austin Seipp 2012
