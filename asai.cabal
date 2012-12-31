@@ -6,8 +6,9 @@ homepage:            http://thoughtpolice.github.com/hs-asai
 bug-reports:         http://github.com/thoughtpolice/hs-asai/issues
 license:             MIT
 license-file:        LICENSE.txt
-copyright:           Copyright (c) Austin Seipp 2012
-author:              Austin Seipp <mad.one@gmail.com>
+copyright:           Copyright (c) Oleg Kiselyov 2007-2012,
+                               (c) Austin Seipp  2012
+author:              Oleg Kiselyov <oleg@pobox.com>
 maintainer:          Austin Seipp <mad.one@gmail.com>
 category:            Control
 build-type:          Simple

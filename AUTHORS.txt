@@ -1,3 +1,7 @@
-Author, target of blame:
+Original author:
+
+  Oleg Kiselyov <oleg [@at] pobox [dot] com>
+
+Maintainer:
 
   Austin Seipp <mad [dot] one [@at] gmail [dot] com>
