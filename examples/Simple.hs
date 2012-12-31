@@ -25,13 +25,32 @@ ans1 = runDelim $ reset $ do
 -- This is equivalent to the OchaCaml term:
 --   reset (fun () -> 1 + shift (fun _ -> "hello")) ;;
 
+ans1' :: String
+ans1' = runDelim $ reset $ do
+  r <- shift' (\_ -> return "hello")
+  return (r + 1)
+
 ans2 :: Int
 ans2 = runDelim $ do
   r <- reset $ do
-    x <- shift return
+    x <- shift (\k  -> return k)
     return (x + 1)
   return (r 5)
---   reset (fun () -> 1 + shift (fun k -> k)) ;;
+-- In OchaCaml:
+--   let f = reset (fun () -> 1 + shift (fun k -> k)) ;;
+--   f 5 ;;
+
+ans2' :: Int
+ans2' = runDelim $ do
+  r <- reset $ do
+    x <- shift' (\k -> return k)
+    return (x + (1 :: Int))
+  -- The type of 'r' is:
+  --
+  --   r :: forall t. Int -> Delim t t Int
+  --
+  -- i.e., it is polymorhic in the answer type
+  r 5
 
 -- Append example, with monadic syntax
 
