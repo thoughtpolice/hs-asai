@@ -9,8 +9,8 @@
 -- Portability : portable
 --
 -- This module provides a brief introductory tutorial in the
--- \"Introduction\" section followed by some discussion behind the
--- theory, with references.
+-- \"Introduction\" section, followed by some discussion behind the
+-- theory of the library with references.
 --
 module Control.Delimited.Tutorial
        ( -- * Introduction

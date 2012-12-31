@@ -7,7 +7,8 @@
 -- Stability   : experimental
 -- Portability : portable
 --
--- Delimited continuations featuring answer-type polymorphism.
+-- Delimited continuations featuring answer-type polymorphism, via
+-- parameterized monads.
 --
 -- There is a tutorial available in "Control.Delimited.Tutorial".
 --
