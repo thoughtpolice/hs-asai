@@ -17,14 +17,13 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Delimited.html
 </p><p>If a <code><a href="Control-Delimited.html#t:Delim">Delim</a></code> does not capture the computation using one of the
  various <code>shift</code> operators (or <code>shift</code> does not change the answer
  type,) then the term is <em>polymorphic</em> in the answer type.
-</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>:t runDelim $ reset $ shift2 ret !&gt;&gt;= \r -&gt; ret (r + (1 :: Int))
-</code></strong>runDelim $ reset $ shift2 ret !&gt;&gt;= \r -&gt; ret (r + (1 :: Int))
-  :: Int -&gt; forall a'. Delim a' a' Int
+</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>:t runDelim $ reset $ shift2 (\k -&gt; ret k) !&gt;&gt;= \r -&gt; ret (r + (1::Int))
+</code></strong>runDelim $ reset $ shift2 (\k -&gt; ret k) !&gt;&gt;= \r -&gt; ret (r + (1::Int))
+  :: Int -&gt; Delim a' a' Int
 </pre><p>Note how the quantified variable <code>a'</code> is both the input and output
- answer type: thus, it cannot change from what is (in this case, the
- answer type of the enclosing <code><a href="Control-Delimited.html#v:reset">reset</a></code> is <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Int.html#t:Int">Int</a></code>.) We use <code><a href="Control-Delimited.html#v:shift2">shift2</a></code>
- here, which uses rank-2 typing to ensure the type variable does not
- 'escape', much like the <code>ST</code> monad.
+ answer type: thus, <code>k</code> will work with any answer type and is
+ polymorphic (in this case, the answer type of the enclosing <code><a href="Control-Delimited.html#v:reset">reset</a></code>
+ is <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Int.html#t:Int">Int</a></code>.)
 </p></div><div class="subs instances"><p id="control.i:Delim" class="caption collapser" onclick="toggleSection('i:Delim')">Instances</p><div id="section.i:Delim" class="show"><table><tr><td class="src"><a href="Control-Indexed-Monad.html#t:Monad-39-">Monad'</a> <a href="Control-Delimited.html#t:Delim">Delim</a></td><td class="doc"><p>Delimited continuations form a parameterized <code><a href="Control-Indexed-Monad.html#t:Monad-39-">Monad'</a></code>.
 </p></td></tr></table></div></div></div><div class="top"><p class="src"><a name="v:reset" class="def">reset</a> ::  <a href="Control-Delimited.html#t:Delim">Delim</a> s t s -&gt; <a href="Control-Delimited.html#t:Delim">Delim</a> s' s' t<a href="src/Control-Delimited.html#reset" class="link">Source</a></p><div class="doc"><p>Delimit a computation.
 </p></div></div><h2 id="g:2">A family of shift operators
@@ -40,7 +39,7 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Delimited.html
  bound as a paramter.
 </p><p>This definition of <code>shift</code> uses Rank-2 types to ensure the answer
  type is in fact polymorphic: note the type of the captured continuation
- is of type <code>Delim t' t' s</code>.
+ is <code>Delim t' t' s</code>.
 </p></div></div><h2 id="g:3">Executing delimited computations
 </h2><div class="top"><p class="src"><a name="v:runDelim" class="def">runDelim</a> ::  <a href="Control-Delimited.html#t:Delim">Delim</a> t t t -&gt; t<a href="src/Control-Delimited.html#runDelim" class="link">Source</a></p><div class="doc"><p>Run a delimited computation.
 </p></div></div><h1 id="g:4">Re-exports for convenience
