@@ -1,4 +1,5 @@
 /dist/
+/bench/*.html
 *.o
 *.hi
 *~
