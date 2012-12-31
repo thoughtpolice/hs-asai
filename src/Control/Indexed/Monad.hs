@@ -14,9 +14,9 @@
 --
 module Control.Indexed.Monad
        ( -- * Parameterized monads
-         Monad'(..)
-       , (!>>=)
-       , (!+>>)
+         Monad'(..) -- :: (* -> * -> * -> *) -> Constraint
+       , (!>>=)     -- :: Monad' m => m b g s -> (s -> m a b t) -> m a g t
+       , (!+>>)     -- :: Monad' m => m b g s -> m a b t -> m a g t
        ) where
 
 --------------------------------------------------------------------------------
