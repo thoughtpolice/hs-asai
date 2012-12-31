@@ -1,4 +1,5 @@
-{-# OPTIONS_GHC -fno-warn-unused-imports #-}
+{-# OPTIONS_GHC -w #-}
+{-# LANGUAGE RebindableSyntax #-}
 -- |
 -- Module      : Control.Delimited.Tutorial
 -- Copyright   : (c) Oleg Kiselyov 2007-2012, (c) Austin Seipp 2012
@@ -16,17 +17,36 @@ module Control.Delimited.Tutorial
        ( -- * Introduction
          -- $intro
 
+         -- * Notes on @do@-notation
+         -- $donotation
+
          -- * References
          -- $refs
        ) where
+import Prelude hiding (return, fail, (>>=), (=<<))
 import Control.Delimited
+
+--
+-- Aspects of RebindableSyntax
+--
+
+m >>= f  = m !>>= f
+return x = ret x
+fail x   = error x
+f =<< m  = m !>>= f
 
 {- $intro
 
 Lorem ipsum...
 
->>> runDelim $ reset (shift (\_ -> ret "hello") !>>= \r -> ret (r + 1))
+>>> runDelim $ reset $ (shift (\_ -> return "hello") >>= \r -> return (r + 1))
 "hello"
+
+-}
+
+{- $donotation
+
+Lorem ipsum...
 
 -}
 
