@@ -43,15 +43,14 @@ import Control.Indexed.Monad
 -- various @shift@ operators (or @shift@ does not change the answer
 -- type,) then the term is /polymorphic/ in the answer type.
 --
--- >>> :t runDelim $ reset $ shift2 ret !>>= \r -> ret (r + (1 :: Int))
--- runDelim $ reset $ shift2 ret !>>= \r -> ret (r + (1 :: Int))
---   :: Int -> forall a'. Delim a' a' Int
+-- >>> :t runDelim $ reset $ shift2 (\k -> ret k) !>>= \r -> ret (r + (1::Int))
+-- runDelim $ reset $ shift2 (\k -> ret k) !>>= \r -> ret (r + (1::Int))
+--   :: Int -> Delim a' a' Int
 --
 -- Note how the quantified variable @a'@ is both the input and output
--- answer type: thus, it cannot change from what is (in this case, the
--- answer type of the enclosing 'reset' is 'Int'.) We use 'shift2'
--- here, which uses rank-2 typing to ensure the type variable does not
--- \'escape\', much like the @ST@ monad.
+-- answer type: thus, @k@ will work with any answer type and is
+-- polymorphic (in this case, the answer type of the enclosing 'reset'
+-- is 'Int'.)
 newtype Delim s t b
   = Delim { unDelim :: (b -> s) -> t }
 
@@ -85,7 +84,7 @@ shift1 f = Delim (\k -> unDelim (f k) id)
 --
 -- This definition of @shift@ uses Rank-2 types to ensure the answer
 -- type is in fact polymorphic: note the type of the captured continuation
--- is of type @Delim t' t' s@.
+-- is @Delim t' t' s@.
 shift2 :: ((b -> forall a'.  Delim a' a' s) -> Delim a t a) -> Delim s t b
 shift2 f = Delim (\k -> unDelim (f $ \t -> ret (k t)) id)
 
