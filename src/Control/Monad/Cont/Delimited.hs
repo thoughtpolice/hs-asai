@@ -50,7 +50,7 @@ infixl 1 !>>=
 -- @m1 !+>> m2 = bind m1 (const m2)@
 (!+>>) :: Monadish m => m b g s -> m a b t -> m a g t
 m1 !+>> m2 = bind m1 (const m2)
---infixl 1 !+>>
+infixl 1 !+>>
 
 --------------------------------------------------------------------------------
 -- Delimited continuations.
