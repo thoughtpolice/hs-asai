@@ -2,7 +2,8 @@
 module Main
        ( main -- :: IO ()
        ) where
-import Test.Hspec
+import Control.Delimited ()
+import Test.Hspec (hspec)
 
 main :: IO ()
 main = hspec $ do

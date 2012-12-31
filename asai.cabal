@@ -30,7 +30,7 @@ source-repository head
 
 library
   exposed-modules:
-    Control.Monad.Cont.Delimited
+    Control.Delimited
   build-depends:
     base >= 4
 

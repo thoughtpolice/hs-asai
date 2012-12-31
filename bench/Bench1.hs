@@ -1,7 +1,7 @@
 module Main
        ( main -- :: IO ()
        ) where
-import Control.Monad.Cont.Delimited
+import Control.Delimited
 import Criterion.Main (defaultMain, bench, nf)
 
 main :: IO ()

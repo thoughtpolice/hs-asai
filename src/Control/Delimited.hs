@@ -1,5 +1,5 @@
 -- |
--- Module      : Control.Monad.Cont.Delimited
+-- Module      : Control.Delimited
 -- Copyright   : (c) Oleg Kiselyov 2007-2012, (c) Austin Seipp 2012
 -- License     : MIT
 --
@@ -9,7 +9,7 @@
 --
 -- Delimited, answer-type-polymorphic continuations.
 --
-module Control.Monad.Cont.Delimited
+module Control.Delimited
        ( -- * Parameterized monads
          Monad'(..)
        , (!>>=)

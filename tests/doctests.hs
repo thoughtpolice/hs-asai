@@ -4,4 +4,6 @@ module Main
 import Test.DocTest (doctest)
 
 main :: IO ()
-main = doctest ["src/Control/Monad/Cont/Delimited.hs"]
+main = doctest [ "src/Control/Delimited.hs"
+               , "src/Control/Delimited/Tutorial.hs"
+               ]

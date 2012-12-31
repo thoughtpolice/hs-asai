@@ -1,7 +1,7 @@
 {-# LANGUAGE RebindableSyntax #-}
 module Simple where
 import Prelude hiding (return, fail, (>>=), (=<<))
-import Control.Monad.Cont.Delimited
+import Control.Delimited
 
 -- Aspects of RebindableSyntax
 
