@@ -71,7 +71,7 @@ continuation monad which implements truly polymorphic @shift@ and
 results of a delimited computation to vary.
 
 This implementation (using parameterized monads) was first implemented
-as "Genuine shift/reset in Haskell" by Oleg Kiselyov [1]. It directly
+as \"Genuine shift/reset in Haskell\" by Oleg Kiselyov [1]. It directly
 implements the typing rules of K. Asai's lambda/shift language [2],
 featuring answer type polymorphism.
 
