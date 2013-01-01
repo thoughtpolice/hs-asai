@@ -9,8 +9,10 @@
 --
 -- Parameterized monads.
 --
--- When using GHC with @RebindableSyntax@, it's possible to overload
--- regular @do@-notation to use the 'Monad'' typeclass.
+-- When using @RebindableSyntax@ with GHC, it's possible to overload
+-- regular @do@-notation to use the 'Monad'' typeclass. See the
+-- section \"Using @do@-notation\" in the tutorial module
+-- "Control.Delimited.Tutorial".
 --
 module Control.Indexed.Monad
        ( -- * Parameterized monads
