@@ -9,23 +9,37 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Delimited.html
  parameterized monads.
 </p><p>There is a tutorial available in <a href="Control-Delimited-Tutorial.html">Control.Delimited.Tutorial</a>.
 </p></div></div><div id="synopsis"><p id="control.syn" class="caption expander" onclick="toggleSection('syn')">Synopsis</p><ul id="section.syn" class="hide" onclick="toggleSection('syn')"><li class="src short"><span class="keyword">data</span>  <a href="#t:Delim">Delim</a> s t b</li><li class="src short"><a href="#v:reset">reset</a> ::  <a href="Control-Delimited.html#t:Delim">Delim</a> s t s -&gt; <a href="Control-Delimited.html#t:Delim">Delim</a> s' s' t</li><li class="src short"><a href="#v:shift0">shift0</a> ::  ((b -&gt; s) -&gt; t) -&gt; <a href="Control-Delimited.html#t:Delim">Delim</a> s t b</li><li class="src short"><a href="#v:shift1">shift1</a> ::  ((b -&gt; s) -&gt; <a href="Control-Delimited.html#t:Delim">Delim</a> a t a) -&gt; <a href="Control-Delimited.html#t:Delim">Delim</a> s t b</li><li class="src short"><a href="#v:shift2">shift2</a> ::  ((b -&gt; <span class="keyword">forall</span> a'.  <a href="Control-Delimited.html#t:Delim">Delim</a> a' a' s) -&gt; <a href="Control-Delimited.html#t:Delim">Delim</a> a t a) -&gt; <a href="Control-Delimited.html#t:Delim">Delim</a> s t b</li><li class="src short"><a href="#v:runDelim">runDelim</a> ::  <a href="Control-Delimited.html#t:Delim">Delim</a> t t t -&gt; t</li><li class="src short">module <a href="Control-Indexed-Monad.html">Control.Indexed.Monad</a></li></ul></div><div id="interface"><h1 id="g:1">Delimited continuations
-</h1><div class="top"><p class="src"><span class="keyword">data</span>  <a name="t:Delim" class="def">Delim</a> s t b <a href="src/Control-Delimited.html#Delim" class="link">Source</a></p><div class="doc"><p>The type of a delimited continuation, which is answer-type polymorphic.
+</h1><div class="top"><p class="src"><span class="keyword">data</span>  <a name="t:Delim" class="def">Delim</a> s t b <a href="src/Control-Delimited.html#Delim" class="link">Source</a></p><div class="doc"><p>The type of a delimited continuation, which is answer-type
+ polymorphic.
 </p><p>Functions of type <code>a -&gt; <code><a href="Control-Delimited.html#t:Delim">Delim</a></code> s t b</code> can be thought of as
  functions of type <code>a / s -&gt; b / t</code>, which means given an <code>a</code> we
- return a <code>b</code>, changing the <em>answer type</em> of the continuation from
- <code>s</code> to <code>t</code>. The take away from this is that the <code>s</code> and <code>t</code>
+ return <code>b</code>, changing the <em>answer type</em> of the delimited computation
+ from <code>s</code> to <code>t</code>. The take away from this is that the <code>s</code> and <code>t</code>
  variables representing the input and output answer type,
- respectively.
-</p><p>If a <code><a href="Control-Delimited.html#t:Delim">Delim</a></code> does not capture the computation using one of the
- various <code>shift</code> operators (or <code>shift</code> does not change the answer
- type,) then the term is <em>polymorphic</em> in the answer type.
+ respectively. (This notation is used in both OchaCaml and the
+ definition of Asai's lambda/shift calculus.)
+</p><p>If a <code><a href="Control-Delimited.html#t:Delim">Delim</a></code> operation does not capture the computation using one
+ of the various <code>shift</code> operators (or <code>shift</code> does not change the
+ answer type,) then the term is <em>polymorphic</em> in the answer type.
+</p><p>Consider a term like:
+</p><pre>
+ reset $ [...] !&gt;&gt;= \r -&gt; ret $ r ++ &quot; world&quot;
+</pre><p>Here, the answer type of the enclosing <code><a href="Control-Delimited.html#v:reset">reset</a></code> is <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code>. If the
+ hole (specified by <code>[...]</code>) does not have a <code>shift</code> operator, or
+ the <code>shift</code> operator does not change the answer type, then the type
+ of the hole is answer type polymorphic: the hole cannot change the
+ answer type of the enclosing <code><a href="Control-Delimited.html#v:reset">reset</a></code>.
+</p><p>To make this clearer, consider using a <code>shift</code> operator to return
+ the delimited continuation to the outer <code><a href="Control-Delimited.html#v:reset">reset</a></code> (which does not
+ modify the answer type, since we can only invoke <code>k</code> to return an
+ <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Int.html#t:Int">Int</a></code>):
 </p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>:t runDelim $ reset $ shift2 (\k -&gt; ret k) !&gt;&gt;= \r -&gt; ret (r + (1::Int))
 </code></strong>runDelim $ reset $ shift2 (\k -&gt; ret k) !&gt;&gt;= \r -&gt; ret (r + (1::Int))
   :: Int -&gt; Delim a' a' Int
 </pre><p>Note how the quantified variable <code>a'</code> is both the input and output
- answer type: thus, <code>k</code> will work with any answer type and is
- polymorphic (in this case, the answer type of the enclosing <code><a href="Control-Delimited.html#v:reset">reset</a></code>
- is <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Int.html#t:Int">Int</a></code>.)
+ answer type of <code>k</code>: thus, it cannot change the answer type (here we use
+ <code><a href="Control-Delimited.html#v:shift2">shift2</a></code> which features a rank-2 type, perfectly matching the same
+ kind of type you would see in OchaCaml.)
 </p></div><div class="subs instances"><p id="control.i:Delim" class="caption collapser" onclick="toggleSection('i:Delim')">Instances</p><div id="section.i:Delim" class="show"><table><tr><td class="src"><a href="Control-Indexed-Monad.html#t:Monad-39-">Monad'</a> <a href="Control-Delimited.html#t:Delim">Delim</a></td><td class="doc"><p>Delimited continuations form a parameterized <code><a href="Control-Indexed-Monad.html#t:Monad-39-">Monad'</a></code>.
 </p></td></tr></table></div></div></div><div class="top"><p class="src"><a name="v:reset" class="def">reset</a> ::  <a href="Control-Delimited.html#t:Delim">Delim</a> s t s -&gt; <a href="Control-Delimited.html#t:Delim">Delim</a> s' s' t<a href="src/Control-Delimited.html#reset" class="link">Source</a></p><div class="doc"><p>Delimit a computation. The type variable <code>s'</code> indicates that
  <code><a href="Control-Delimited.html#v:reset">reset</a></code> is polymorphic in its answer type.
