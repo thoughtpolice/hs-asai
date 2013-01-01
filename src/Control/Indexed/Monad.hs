@@ -15,6 +15,9 @@
 module Control.Indexed.Monad
        ( -- * Parameterized monads
          Monad'(..) -- :: (* -> * -> * -> *) -> Constraint
+       , MW         -- :: (* -> *) -> * -> * -> * -> *
+       , lift       -- :: Monad m => m a -> MW m p q a
+       , runI       -- :: Monad m => MW m p q a -> m a
        , (!>>=)     -- :: Monad' m => m b g s -> (s -> m a b t) -> m a g t
        , (!+>>)     -- :: Monad' m => m b g s -> m a b t -> m a g t
        ) where
@@ -24,16 +27,25 @@ module Control.Indexed.Monad
 
 -- | Parameterized monads.
 --
--- Regular monads are automatically lifted into this class through a
--- (hidden) newtype constructor.
+-- Regular monads can be lifted into this type class using 'lift'.
 class Monad' m where
   -- | Parameterized 'Prelude.return'.
   ret  :: t -> m a a t
   -- | Parameterized 'Prelude.>>='.
   bind :: m b g s -> (s -> m a b t) -> m a g t
 
--- | This newtype lifts any regular monad into a parameterized monad.
+-- | This type lifts any regular monad into a parameterized monad.
 newtype MW m p q a = MW { unMW :: m a }
+
+-- | This method \'lifts\' a regular monad into a parameterized monad
+-- 'MW' which is an instance of 'Monad''.
+lift :: Monad m => m a -> MW m p q a
+lift = MW
+
+-- | This demotes a parameterized monad into a regular monad. Useful
+-- for when you're using e.g. @RebindableSyntax@ and want to do IO.
+runI :: Monad m => MW m p q a -> m a
+runI = unMW
 
 -- | This instances simply lifts regular instances of 'Monad'
 -- into instances of 'Monad''.

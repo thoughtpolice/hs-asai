@@ -1,20 +1,23 @@
 {-# LANGUAGE RebindableSyntax #-}
 module Simple where
-import Prelude hiding (return, fail, (>>=), (=<<))
+import Prelude hiding (return, fail, (>>=), (=<<), (>>))
 import Control.Delimited
 
 -- Aspects of RebindableSyntax
 
-m >>= f  = m !>>= f
 return x = ret x
 fail x   = error x
+m >>= f  = m !>>= f
 f =<< m  = m !>>= f
+f >> k   = f !>>= \_ -> k
 
 -- Test of compatibility with Prelude
 
 io1 :: IO ()
-io1 = do
-  putStrLn "hi!"
+io1 = runI $ do
+  lift $ putStrLn "hi!"
+  lift $ putStrLn "bye!"
+  return ()
 
 -- Simple test of answer type modification
 

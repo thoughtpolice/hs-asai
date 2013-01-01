@@ -60,20 +60,26 @@ otherwise):
 
 > [-# LANGUAGE RebindableSyntax #-]
 > module Foo where
-> import Prelude hiding (return, fail, (>>=), (=<<))
+> import Prelude hiding (return, fail, (>>=), (=<<), (>>))
 > import Control.Delimited
 >
 > -- Aspects of RebindableSyntax
-> m >>= f  = m !>>= f
 > return x = ret x
+> fail s   = error s
+> m >>= f  = m !>>= f
 > f =<< m  = m !>>= f
+> f >> k   = m !>>= \_ -> k
 >
 > -- Now use 'do' notation instead of the indexed bind/return
 > -- functions.
 >
+> -- You can lift regular monads into parameterized monads using
+> -- 'lift' and 'runI'
 > io1 :: IO ()
-> io1 = do
->   putStrLn "hi!"
+> io1 = runI $ do
+>   lift $ putStrLn "hi!"
+>   lift $ putStrLn "hi!"
+>   return ()
 >
 > test1 :: String
 > test1 = runDelim $ reset $ do
