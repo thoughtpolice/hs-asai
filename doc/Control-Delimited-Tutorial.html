@@ -2,8 +2,9 @@
 window.onload = function () {pageLoad();setSynopsis("mini_Control-Delimited-Tutorial.html");};
 //]]>
 </script></head><body><div id="package-header"><ul class="links" id="page-menu"><li><a href="src/Control-Delimited-Tutorial.html">Source</a></li><li><a href="index.html">Contents</a></li><li><a href="doc-index.html">Index</a></li></ul><p class="caption">asai-0.0.0.0: A minimal library for delimited continuations.</p></div><div id="content"><div id="module-header"><table class="info"><tr><th>Portability</th><td>portable</td></tr><tr><th>Stability</th><td>experimental</td></tr><tr><th>Maintainer</th><td>mad.one@gmail.com</td></tr><tr><th>Safe Haskell</th><td>Safe-Inferred</td></tr></table><p class="caption">Control.Delimited.Tutorial</p></div><div id="table-of-contents"><p class="caption">Contents</p><ul><li><a href="#g:1">Introduction
-</a></li><li><a href="#g:2">Notes on <code>do</code>-notation
-</a></li><li><a href="#g:3">References
+</a></li><li><a href="#g:2">Using <code>do</code>-notation
+</a></li><li><a href="#g:3">Other notes
+</a></li><li><a href="#g:4">References
 </a></li></ul></div><div id="description"><p class="caption">Description</p><div class="doc"><p>This module provides a brief introductory tutorial in the
  &quot;Introduction&quot; section, followed by some discussion behind the
  theory of the library with references.
@@ -11,9 +12,51 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Delimited-Tuto
 </h1><div class="doc"><p>Lorem ipsum...
 </p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>runDelim $ reset $ (shift1 (\_ -&gt; return &quot;hello&quot;) &gt;&gt;= \r -&gt; return (r + 1))
 </code></strong>&quot;hello&quot;
-</pre></div><h1 id="g:2">Notes on <code>do</code>-notation
-</h1><div class="doc"><p>Lorem ipsum...
-</p></div><h1 id="g:3">References
+</pre></div><h1 id="g:2">Using <code>do</code>-notation
+</h1><div class="doc"><p>It's possible to use GHC's <code>RebindableSyntax</code> extension to re-define
+<code>do</code> notation to use the <code><a href="Control-Indexed-Monad.html#t:Monad-39-">Monad'</a></code> type class.
+</p><p>Begin your module by hiding the regular <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> methods, and then
+redefine <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Prelude.html#t:-62--62--61-">&gt;&gt;=</a></code> and <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Prelude.html#t:return">return</a></code>. Feel free to redefine
+other operators too. Here's an example (you'll need to fix the
+<code>LANGUAGE</code> pragma yourself on the first line, since Haddock eats it
+otherwise):
+</p><pre> [-# LANGUAGE RebindableSyntax #-]
+ module Foo where
+ import Prelude hiding (return, fail, (&gt;&gt;=), (=&lt;&lt;), (&gt;&gt;))
+ import Control.Delimited
+
+ -- Aspects of RebindableSyntax
+ return x = ret x
+ fail s   = error s
+ m &gt;&gt;= f  = m !&gt;&gt;= f
+ f =&lt;&lt; m  = m !&gt;&gt;= f
+ f &gt;&gt; k   = m !&gt;&gt;= \_ -&gt; k
+
+ -- Now use 'do' notation instead of the indexed bind/return
+ -- functions.
+
+ -- You can lift regular monads into parameterized monads using
+ -- 'lift' and 'runI'
+ io1 :: IO ()
+ io1 = runI $ do
+   lift $ putStrLn &quot;hi!&quot;
+   lift $ putStrLn &quot;hi!&quot;
+   return ()
+
+ test1 :: String
+ test1 = runDelim $ reset $ do
+   r &lt;- shift1 (\_ -&gt; return &quot;hello&quot;)
+   return (r + 1)
+ -- This is equivalent to the OchaCaml term:
+ --   reset (fun () -&gt; 1 + shift (fun _ -&gt; &quot;hello&quot;)) ;;
+</pre><p>See <code>examples/Simple.hs</code> (included in the distribution) for several
+more examples.
+</p></div><h1 id="g:3">Other notes
+</h1><div class="doc"><p>This package requires GHC's <code>RankNTypes</code> extension, as it uses it for
+the definition of <code><a href="Control-Delimited.html#v:shift2">shift2</a></code>. The original
+implementation by Kiselyov is Haskell98. You do not need to enable
+<code>RankNTypes</code> to use this package.
+</p></div><h1 id="g:4">References
 </h1><div class="doc"><ul><li> <em>Polymorphic Delimited Continuations</em>, by Asai, Kameyama in <em>APLAS '07</em>:
     <a href="http://logic.cs.tsukuba.ac.jp/~kam/paper/aplas07.pdf">http://logic.cs.tsukuba.ac.jp/~kam/paper/aplas07.pdf</a>
 </li><li> <em>Genuine shift\reset in Haskell98</em>, by Kiselyov, on <em>haskell-cafe</em>:

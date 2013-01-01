@@ -28,9 +28,9 @@
 <a name="line-19"></a>       <span class='hs-layout'>,</span> <span class='hs-varid'>reset</span>     <span class='hs-comment'>-- :: Delim s t s -&gt; Delim s' s' t</span>
 <a name="line-20"></a>
 <a name="line-21"></a>         <span class='hs-comment'>-- ** A family of shift operators</span>
-<a name="line-22"></a>       <span class='hs-layout'>,</span> <span class='hs-varid'>shift0</span>    <span class='hs-comment'>--</span>
-<a name="line-23"></a>       <span class='hs-layout'>,</span> <span class='hs-varid'>shift1</span>    <span class='hs-comment'>--</span>
-<a name="line-24"></a>       <span class='hs-layout'>,</span> <span class='hs-varid'>shift2</span>    <span class='hs-comment'>--</span>
+<a name="line-22"></a>       <span class='hs-layout'>,</span> <span class='hs-varid'>shift0</span>    <span class='hs-comment'>-- :: ((b -&gt; s) -&gt; t) -&gt; Delim s t b</span>
+<a name="line-23"></a>       <span class='hs-layout'>,</span> <span class='hs-varid'>shift1</span>    <span class='hs-comment'>-- :: ((b -&gt; s) -&gt; Delim a t a) -&gt; Delim s t b</span>
+<a name="line-24"></a>       <span class='hs-layout'>,</span> <span class='hs-varid'>shift2</span>    <span class='hs-comment'>-- :: ((b -&gt; forall a'.  Delim a' a' s) -&gt; Delim a t a) -&gt; Delim s t b</span>
 <a name="line-25"></a>
 <a name="line-26"></a>         <span class='hs-comment'>-- ** Executing delimited computations</span>
 <a name="line-27"></a>       <span class='hs-layout'>,</span> <span class='hs-varid'>runDelim</span>  <span class='hs-comment'>-- :: Delim t t t -&gt; t</span>
