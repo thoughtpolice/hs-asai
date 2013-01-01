@@ -25,6 +25,7 @@ tested-with:         GHC == 7.6.1
 
 extra-source-files:
   AUTHORS.txt README.md CONTRIBUTING.md CHANGELOG.md
+  examples/Simple.hs
 
 source-repository head
   type: git
