@@ -5,9 +5,11 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Delimited-Tuto
 </a></li><li><a href="#g:2">Delimited continuations
 </a><ul><li><a href="#g:3">Part 1
 </a></li><li><a href="#g:4">Part 2
-</a></li></ul></li><li><a href="#g:5">Using <code>do</code>-notation
-</a></li><li><a href="#g:6">Other notes
-</a></li><li><a href="#g:7">References
+</a></li></ul></li><li><a href="#g:5">Internals and design
+</a><ul><li><a href="#g:6">Parameterized monads
+</a></li><li><a href="#g:7">Using <code>do</code>-notation
+</a></li></ul></li><li><a href="#g:8">Other notes
+</a></li><li><a href="#g:9">References
 </a></li></ul></div><div id="description"><p class="caption">Description</p><div class="doc"><p>This module provides a brief introductory tutorial in the
  &quot;Introduction&quot; section, followed by some discussion behind the
  theory of the library with references.
@@ -22,20 +24,21 @@ you were in when you invoked <code>f</code>.
 possible to return a value from the continuation; you merely pick up
 where you left off. By fixing this we get delimited continuations: an
 abstraction that allows us to slice up a continuation and compose
-them. But at this point, we suffer in a statically typed language due
-to the fact that the type of the continuation is fixed, and cannot
-vary.
+them. But at this point, we suffer in a statically typed language: the
+type of <code>shift</code> and <code>reset</code> are not polymorphic in their return.
 </p><p>In the same way that continuations form a monad, so do delimited
-continuations in their composition. This package provides a delimited
-continuation monad which implements truly polymorphic <code>shift</code> and
-<code>reset</code> operators, via <em>answer type polymorphism</em>, which allows the
-results of a delimited computation to vary.
+continuations. This package provides a delimited continuation monad
+which implements truly polymorphic <code>shift</code> and <code>reset</code> operators, via
+<em>answer type polymorphism</em>, which allows the results of a delimited
+computation to vary.
 </p><p>This implementation (using parameterized monads) was first implemented
 by - and this package derived from - Oleg Kiselyov [1]. It directly
 implements the typing rules of Kenichi Asai's lambda/shift calculus
-[2], featuring answer type polymorphism.
+[2], featuring answer type polymorphism and modification.
 </p><p>A general tutorial on delimited continuations in OchaCaml (with code
-in Haskell and OCaml) from Asai/Kiselyov is available [3].
+in Haskell and OCaml) from Asai/Kiselyov is available [3]. A more
+traditional delimited continuation monad is available in the
+<code>CC-delcont</code> package [4].
 </p></div><h1 id="g:2">Delimited continuations
 </h1><div class="doc"><p>Lorem ipsum...
 </p></div><h2 id="g:3">Part 1
@@ -46,8 +49,52 @@ in Haskell and OCaml) from Asai/Kiselyov is available [3].
 </h2><div class="doc"><p>Lorem ipsum...
 </p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>runDelim $ reset $ shift1 (\_ -&gt; return &quot;hello&quot;) &gt;&gt;= \r -&gt; return (r + 1)
 </code></strong>&quot;hello&quot;
-</pre></div><h1 id="g:5">Using <code>do</code>-notation
-</h1><div class="doc"><p>It's possible to use GHC's <code>RebindableSyntax</code> extension to re-define
+</pre></div><h1 id="g:5">Internals and design
+</h1><div class="doc"><p>Here we discuss some of the design aspects of the library,
+particularly for those wondering why we need parameterized (or
+<em>indexed</em>) monads.
+</p></div><h2 id="g:6">Parameterized monads
+</h2><div class="doc"><p>While reading this tutorial, you may wonder why we use special
+operators (like <code><a href="Control-Indexed-Monad.html#v:-33--62--62--61-">!&gt;&gt;=</a></code> that mimmick <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Prelude.html#t:-62--62--61-">&gt;&gt;=</a></code>) for delimited
+computations, instead of regular operators from the <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code>
+typeclass. The reason for this is that in order to ensure the answer
+type of delimited computation is polymorphic, we need the monad to
+'carry' the answer types around.
+</p><p>Consider the vanilla <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> typeclass. It is defined like this (with
+explicit kind signatures):
+</p><pre> class Monad (m :: * -&gt; *) where ...
+</pre><p>The <code>m</code> type constructor abstracts over a single type variable. It is
+possible to make types with multiple type variables an instance of
+<code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> of course, but their non-abstracted type variables must be
+fixed. As an example, considering the instance for <code><code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Either.html#t:Either">Either</a></code> e</code>:
+</p><pre> instance Monad (Either e) where ...
+</pre><p>Note the type variable <code>e</code> is fixed over the definition of a term of
+type <code>Either e :: * -&gt; *</code>. If you have something like:
+</p><pre> thing :: a -&gt; Either String a
+ thing a = do
+   ...
+</pre><p>Then in the body we may say:
+</p><pre> x &lt;- Left &quot;oh no!&quot;
+</pre><p>But we can never say:
+</p><pre> x &lt;- Left False
+</pre><p>because <code>e</code> is fixed to <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code>.
+</p><p>Parameterized (or <em>indexed</em>) monads solve this problem by
+'expanding' the kind of <code>m</code> in the <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> typeclass. It is defined
+as:
+</p><pre> class Monad' (m :: * -&gt; * -&gt; * -&gt; *) where
+   ret  :: t -&gt; m a a t
+   bind :: m b g s -&gt; (s -&gt; m a b t) -&gt; m a g t
+</pre><p>Note the new type variables: these represent the input and output
+answer types of a delimited computation. We can see that <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> is
+fully polymorphic in its answer type: a statement of <code>ret foo</code> in a
+<code><a href="Control-Delimited.html#t:Delim">Delim</a></code> simply does not change the answer type at all. Note the answer
+types present in <code><a href="Control-Indexed-Monad.html#t:bind">bind</a></code>: we have <code>a b</code> and <code>b
+g</code>, meaning we can get an overall answer type of <code>a g</code>.
+</p><p>This polymorphism in the definition of <code><a href="Control-Indexed-Monad.html#t:bind">bind</a></code> is
+what gives us answer type polymorphism: it means delimited
+computations may change the output answer type.
+</p></div><h2 id="g:7">Using <code>do</code>-notation
+</h2><div class="doc"><p>It's possible to use GHC's <code>RebindableSyntax</code> extension to re-define
 <code>do</code> notation to use the <code><a href="Control-Indexed-Monad.html#t:Monad-39-">Monad'</a></code> type class.
 </p><p>Begin your module by hiding the regular <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> methods, and then
 redefine <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Prelude.html#t:-62--62--61-">&gt;&gt;=</a></code> and <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Prelude.html#t:return">return</a></code>. Feel free to redefine
@@ -85,16 +132,17 @@ otherwise):
  --   reset (fun () -&gt; 1 + shift (fun _ -&gt; &quot;hello&quot;)) ;;
 </pre><p>See <code>examples/Simple.hs</code> (included in the distribution) for several
 more examples.
-</p></div><h1 id="g:6">Other notes
+</p></div><h1 id="g:8">Other notes
 </h1><div class="doc"><p>This package requires GHC's <code>RankNTypes</code> extension, as it uses it for
 the definition of <code><a href="Control-Delimited.html#v:shift2">shift2</a></code>. The original
 implementation by Kiselyov is Haskell98. You do not need to enable
 <code>RankNTypes</code> to use this package.
-</p></div><h1 id="g:7">References
+</p></div><h1 id="g:9">References
 </h1><div class="doc"><ol><li> <em>Genuine shift\reset in Haskell98</em>, by Kiselyov, on <em>haskell-cafe</em>:
      <a href="http://okmij.org/ftp/continuations/implementations.html#genuine-shift">http://okmij.org/ftp/continuations/implementations.html#genuine-shift</a>
 </li><li> <em>Polymorphic Delimited Continuations</em>, by Asai, Kameyama in <em>APLAS '07</em>:
      <a href="http://logic.cs.tsukuba.ac.jp/~kam/paper/aplas07.pdf">http://logic.cs.tsukuba.ac.jp/~kam/paper/aplas07.pdf</a>
 </li><li> <em>Introduction to programming with shift and reset</em>, by Kiselyov, Asai, in <em>CW2011</em>:
       <a href="http://okmij.org/ftp/continuations/index.html#tutorial">http://okmij.org/ftp/continuations/index.html#tutorial</a>
+</li><li> <em>CC-delcont: Delimited continuations and dynamically scoped variables</em>: <a href="http://hackage.haskell.org/package/CC-delcont">http://hackage.haskell.org/package/CC-delcont</a>
 </li></ol></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.13.1</p></div></body></html>
