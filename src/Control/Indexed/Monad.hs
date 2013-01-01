@@ -20,12 +20,12 @@ module Control.Indexed.Monad
        , MW         -- :: (* -> *) -> * -> * -> * -> *
 
          -- ** Lifting ordinary monads
-       , lift       -- :: Monad m => m a -> MW m p q a
-       , runI       -- :: Monad m => MW m p q a -> m a
+       , lift       -- :: Monad m => m a -> MW m s t a
+       , runI       -- :: Monad m => MW m s t a -> m a
 
          -- * Operators
-       , (!>>=)     -- :: Monad' m => m b g s -> (s -> m a b t) -> m a g t
-       , (!+>>)     -- :: Monad' m => m b g s -> m a b t -> m a g t
+       , (!>>=)     -- :: Monad' m => m t u a -> (a -> m s t b) -> m s u b
+       , (!>=>)     -- :: Monad' m => m t u a -> m s t b -> m s u b
        ) where
 
 --------------------------------------------------------------------------------
@@ -36,21 +36,21 @@ module Control.Indexed.Monad
 -- Regular monads can be lifted into this type class using 'lift'.
 class Monad' m where
   -- | Parameterized 'Prelude.return'.
-  ret  :: t -> m a a t
+  ret  :: a -> m s s a
   -- | Parameterized 'Prelude.>>='.
-  bind :: m b g s -> (s -> m a b t) -> m a g t
+  bind :: m t u a -> (a -> m s t b) -> m s u b
 
 -- | This type lifts any regular monad into a parameterized monad.
-newtype MW m p q a = MW { unMW :: m a }
+newtype MW m s t a = MW { unMW :: m a }
 
 -- | This method \'lifts\' a regular monad into a parameterized monad
 -- 'MW' which is an instance of 'Monad''.
-lift :: Monad m => m a -> MW m p q a
+lift :: Monad m => m a -> MW m s t a
 lift = MW
 
 -- | This demotes a parameterized monad into a regular monad. Useful
 -- for when you're using e.g. @RebindableSyntax@ and want to do IO.
-runI :: Monad m => MW m p q a -> m a
+runI :: Monad m => MW m s t a -> m a
 runI = unMW
 
 -- | This instances simply lifts regular instances of 'Monad'
@@ -60,13 +60,11 @@ instance Monad m => Monad' (MW m) where
   bind (MW m) f = MW (m >>= unMW . f)
 
 -- | Infix synonym for 'bind'.
-(!>>=) :: Monad' m => m b g s -> (s -> m a b t) -> m a g t
+(!>>=) :: Monad' m => m t u a -> (a -> m s t b) -> m s u b
 m !>>= f = bind m f
 infixl 1 !>>=
 
--- | Defined as:
---
--- @m1 !+>> m2 = bind m1 (const m2)@
-(!+>>) :: Monad' m => m b g s -> m a b t -> m a g t
-m1 !+>> m2 = bind m1 (const m2)
-infixl 1 !+>>
+-- | Kleisli composition for indexed monads.
+(!>=>) :: Monad' m => m t u a -> m s t b -> m s u b
+m1 !>=> m2 = m1 !>>= const m2
+infixl 1 !>=>
