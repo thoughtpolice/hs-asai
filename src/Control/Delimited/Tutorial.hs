@@ -26,8 +26,8 @@ module Control.Delimited.Tutorial
          -- ** Part 2
          -- $pt2
 
-         -- * Internals and design
-         -- $internals
+         -- * Other notes
+         -- $othernotes
 
          -- ** Parameterized monads
          -- $pmonads
@@ -35,8 +35,8 @@ module Control.Delimited.Tutorial
          -- ** Using @do@-notation
          -- $donotation
 
-         -- * Other notes
-         -- $othernotes
+         -- ** Rank-2 typing
+         -- $rankntypes
 
          -- * References
          -- $refs
@@ -111,11 +111,11 @@ Lorem ipsum...
 
 -}
 
-{- $internals
+{- $othernotes
 
 Here we discuss some of the design aspects of the library,
 particularly for those wondering why we need parameterized (or
-/indexed/) monads.
+/indexed/) monads, and how we can reconcile this with @do@-notation.
 
 -}
 
@@ -224,12 +224,12 @@ more examples.
 
 -}
 
-{- $othernotes
+{- $rankntypes
 
-This package requires GHC's @RankNTypes@ extension, as it uses it for
-the definition of 'Control.Delimited.shift2'. The original
-implementation by Kiselyov is Haskell98. You do not need to enable
-@RankNTypes@ to use this package.
+This package requires GHC's @RankNTypes@ extension, as it uses a
+rank-2 type for the definition of 'Control.Delimited.shift2'. The
+original implementation by Kiselyov is Haskell98. You do not need to
+enable @RankNTypes@ to use this package.
 
 -}
 
