@@ -35,8 +35,8 @@
 <a name="line-26"></a>         <span class='hs-comment'>-- ** Part 2</span>
 <a name="line-27"></a>         <span class='hs-comment'>-- $pt2</span>
 <a name="line-28"></a>
-<a name="line-29"></a>         <span class='hs-comment'>-- * Internals and design</span>
-<a name="line-30"></a>         <span class='hs-comment'>-- $internals</span>
+<a name="line-29"></a>         <span class='hs-comment'>-- * Other notes</span>
+<a name="line-30"></a>         <span class='hs-comment'>-- $othernotes</span>
 <a name="line-31"></a>
 <a name="line-32"></a>         <span class='hs-comment'>-- ** Parameterized monads</span>
 <a name="line-33"></a>         <span class='hs-comment'>-- $pmonads</span>
@@ -44,8 +44,8 @@
 <a name="line-35"></a>         <span class='hs-comment'>-- ** Using @do@-notation</span>
 <a name="line-36"></a>         <span class='hs-comment'>-- $donotation</span>
 <a name="line-37"></a>
-<a name="line-38"></a>         <span class='hs-comment'>-- * Other notes</span>
-<a name="line-39"></a>         <span class='hs-comment'>-- $othernotes</span>
+<a name="line-38"></a>         <span class='hs-comment'>-- ** Rank-2 typing</span>
+<a name="line-39"></a>         <span class='hs-comment'>-- $rankntypes</span>
 <a name="line-40"></a>
 <a name="line-41"></a>         <span class='hs-comment'>-- * References</span>
 <a name="line-42"></a>         <span class='hs-comment'>-- $refs</span>
@@ -120,11 +120,11 @@
 <a name="line-111"></a>
 <a name="line-112"></a>-}</span>
 <a name="line-113"></a>
-<a name="line-114"></a><span class='hs-comment'>{- $internals
+<a name="line-114"></a><span class='hs-comment'>{- $othernotes
 <a name="line-115"></a>
 <a name="line-116"></a>Here we discuss some of the design aspects of the library,
 <a name="line-117"></a>particularly for those wondering why we need parameterized (or
-<a name="line-118"></a>/indexed/) monads.
+<a name="line-118"></a>/indexed/) monads, and how we can reconcile this with @do@-notation.
 <a name="line-119"></a>
 <a name="line-120"></a>-}</span>
 <a name="line-121"></a>
@@ -233,12 +233,12 @@
 <a name="line-224"></a>
 <a name="line-225"></a>-}</span>
 <a name="line-226"></a>
-<a name="line-227"></a><span class='hs-comment'>{- $othernotes
+<a name="line-227"></a><span class='hs-comment'>{- $rankntypes
 <a name="line-228"></a>
-<a name="line-229"></a>This package requires GHC's @RankNTypes@ extension, as it uses it for
-<a name="line-230"></a>the definition of 'Control.Delimited.shift2'. The original
-<a name="line-231"></a>implementation by Kiselyov is Haskell98. You do not need to enable
-<a name="line-232"></a>@RankNTypes@ to use this package.
+<a name="line-229"></a>This package requires GHC's @RankNTypes@ extension, as it uses a
+<a name="line-230"></a>rank-2 type for the definition of 'Control.Delimited.shift2'. The
+<a name="line-231"></a>original implementation by Kiselyov is Haskell98. You do not need to
+<a name="line-232"></a>enable @RankNTypes@ to use this package.
 <a name="line-233"></a>
 <a name="line-234"></a>-}</span>
 <a name="line-235"></a>

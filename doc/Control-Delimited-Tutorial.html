@@ -5,11 +5,11 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Delimited-Tuto
 </a></li><li><a href="#g:2">Delimited continuations
 </a><ul><li><a href="#g:3">Part 1
 </a></li><li><a href="#g:4">Part 2
-</a></li></ul></li><li><a href="#g:5">Internals and design
+</a></li></ul></li><li><a href="#g:5">Other notes
 </a><ul><li><a href="#g:6">Parameterized monads
 </a></li><li><a href="#g:7">Using <code>do</code>-notation
-</a></li></ul></li><li><a href="#g:8">Other notes
-</a></li><li><a href="#g:9">References
+</a></li><li><a href="#g:8">Rank-2 typing
+</a></li></ul></li><li><a href="#g:9">References
 </a></li></ul></div><div id="description"><p class="caption">Description</p><div class="doc"><p>This module provides a brief introductory tutorial in the
  &quot;Introduction&quot; section, followed by some discussion behind the
  theory of the library with references.
@@ -49,10 +49,10 @@ traditional delimited continuation monad is available in the
 </h2><div class="doc"><p>Lorem ipsum...
 </p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>runDelim $ reset $ shift1 (\_ -&gt; return &quot;hello&quot;) &gt;&gt;= \r -&gt; return (r + 1)
 </code></strong>&quot;hello&quot;
-</pre></div><h1 id="g:5">Internals and design
+</pre></div><h1 id="g:5">Other notes
 </h1><div class="doc"><p>Here we discuss some of the design aspects of the library,
 particularly for those wondering why we need parameterized (or
-<em>indexed</em>) monads.
+<em>indexed</em>) monads, and how we can reconcile this with <code>do</code>-notation.
 </p></div><h2 id="g:6">Parameterized monads
 </h2><div class="doc"><p>While reading this tutorial, you may wonder why we use special
 operators (like <code><a href="Control-Indexed-Monad.html#v:-33--62--62--61-">!&gt;&gt;=</a></code> that mimmick <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Prelude.html#t:-62--62--61-">&gt;&gt;=</a></code>) for delimited
@@ -132,11 +132,11 @@ otherwise):
  --   reset (fun () -&gt; 1 + shift (fun _ -&gt; &quot;hello&quot;)) ;;
 </pre><p>See <code>examples/Simple.hs</code> (included in the distribution) for several
 more examples.
-</p></div><h1 id="g:8">Other notes
-</h1><div class="doc"><p>This package requires GHC's <code>RankNTypes</code> extension, as it uses it for
-the definition of <code><a href="Control-Delimited.html#v:shift2">shift2</a></code>. The original
-implementation by Kiselyov is Haskell98. You do not need to enable
-<code>RankNTypes</code> to use this package.
+</p></div><h2 id="g:8">Rank-2 typing
+</h2><div class="doc"><p>This package requires GHC's <code>RankNTypes</code> extension, as it uses a
+rank-2 type for the definition of <code><a href="Control-Delimited.html#v:shift2">shift2</a></code>. The
+original implementation by Kiselyov is Haskell98. You do not need to
+enable <code>RankNTypes</code> to use this package.
 </p></div><h1 id="g:9">References
 </h1><div class="doc"><ol><li> <em>Genuine shift\reset in Haskell98</em>, by Kiselyov, on <em>haskell-cafe</em>:
      <a href="http://okmij.org/ftp/continuations/implementations.html#genuine-shift">http://okmij.org/ftp/continuations/implementations.html#genuine-shift</a>
