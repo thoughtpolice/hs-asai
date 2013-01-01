@@ -26,7 +26,13 @@ module Control.Delimited.Tutorial
          -- ** Part 2
          -- $pt2
 
-         -- * Using @do@-notation
+         -- * Internals and design
+         -- $internals
+
+         -- ** Parameterized monads
+         -- $pmonads
+
+         -- ** Using @do@-notation
          -- $donotation
 
          -- * Other notes
@@ -60,23 +66,24 @@ But @call/cc@ is, as some say, 'overrated.' For one, it is not
 possible to return a value from the continuation; you merely pick up
 where you left off. By fixing this we get delimited continuations: an
 abstraction that allows us to slice up a continuation and compose
-them. But at this point, we suffer in a statically typed language due
-to the fact that the type of the continuation is fixed, and cannot
-vary.
+them. But at this point, we suffer in a statically typed language: the
+type of @shift@ and @reset@ are not polymorphic in their return.
 
 In the same way that continuations form a monad, so do delimited
-continuations in their composition. This package provides a delimited
-continuation monad which implements truly polymorphic @shift@ and
-@reset@ operators, via /answer type polymorphism/, which allows the
-results of a delimited computation to vary.
+continuations. This package provides a delimited continuation monad
+which implements truly polymorphic @shift@ and @reset@ operators, via
+/answer type polymorphism/, which allows the results of a delimited
+computation to vary.
 
 This implementation (using parameterized monads) was first implemented
 by - and this package derived from - Oleg Kiselyov [1]. It directly
 implements the typing rules of Kenichi Asai's lambda/shift calculus
-[2], featuring answer type polymorphism.
+[2], featuring answer type polymorphism and modification.
 
 A general tutorial on delimited continuations in OchaCaml (with code
-in Haskell and OCaml) from Asai/Kiselyov is available [3].
+in Haskell and OCaml) from Asai/Kiselyov is available [3]. A more
+traditional delimited continuation monad is available in the
+@CC-delcont@ package [4].
 
 -}
 
@@ -101,6 +108,73 @@ Lorem ipsum...
 
 >>> runDelim $ reset $ shift1 (\_ -> return "hello") >>= \r -> return (r + 1)
 "hello"
+
+-}
+
+{- $internals
+
+Here we discuss some of the design aspects of the library,
+particularly for those wondering why we need parameterized (or
+/indexed/) monads.
+
+-}
+
+{- $pmonads
+
+While reading this tutorial, you may wonder why we use special
+operators (like '!>>=' that mimmick 'Prelude.>>=') for delimited
+computations, instead of regular operators from the 'Monad'
+typeclass. The reason for this is that in order to ensure the answer
+type of delimited computation is polymorphic, we need the monad to
+\'carry\' the answer types around.
+
+Consider the vanilla 'Monad' typeclass. It is defined like this (with
+explicit kind signatures):
+
+> class Monad (m :: * -> *) where ...
+
+The @m@ type constructor abstracts over a single type variable. It is
+possible to make types with multiple type variables an instance of
+'Monad' of course, but their non-abstracted type variables must be
+fixed. As an example, considering the instance for @'Either' e@:
+
+> instance Monad (Either e) where ...
+
+Note the type variable @e@ is fixed over the definition of a term of
+type @Either e :: * -> *@. If you have something like:
+
+> thing :: a -> Either String a
+> thing a = do
+>   ...
+
+Then in the body we may say:
+
+> x <- Left "oh no!"
+
+But we can never say:
+
+> x <- Left False
+
+because @e@ is fixed to 'String'.
+
+Parameterized (or /indexed/) monads solve this problem by
+\'expanding\' the kind of @m@ in the 'Monad' typeclass. It is defined
+as:
+
+> class Monad' (m :: * -> * -> * -> *) where
+>   ret  :: t -> m a a t
+>   bind :: m b g s -> (s -> m a b t) -> m a g t
+
+Note the new type variables: these represent the input and output
+answer types of a delimited computation. We can see that 'ret' is
+fully polymorphic in its answer type: a statement of @ret foo@ in a
+'Delim' simply does not change the answer type at all. Note the answer
+types present in 'Control.Indexed.Monad.bind': we have @a b@ and @b
+g@, meaning we can get an overall answer type of @a g@.
+
+This polymorphism in the definition of 'Control.Indexed.Monad.bind' is
+what gives us answer type polymorphism: it means delimited
+computations may change the output answer type.
 
 -}
 
@@ -169,5 +243,7 @@ implementation by Kiselyov is Haskell98. You do not need to enable
 
   3. /Introduction to programming with shift and reset/, by Kiselyov, Asai, in /CW2011/:
       <http://okmij.org/ftp/continuations/index.html#tutorial>
+
+  4. /CC-delcont: Delimited continuations and dynamically scoped variables/: <http://hackage.haskell.org/package/CC-delcont>
 
 -}
