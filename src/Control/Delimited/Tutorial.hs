@@ -71,12 +71,12 @@ continuation monad which implements truly polymorphic @shift@ and
 results of a delimited computation to vary.
 
 This implementation (using parameterized monads) was first implemented
-as \"Genuine shift/reset in Haskell\" by Oleg Kiselyov [1]. It directly
-implements the typing rules of K. Asai's lambda/shift language [2],
-featuring answer type polymorphism.
+by - and this package derived from - Oleg Kiselyov [1]. It directly
+implements the typing rules of Kenichi Asai's lambda/shift calculus
+[2], featuring answer type polymorphism.
 
-A general tutorial on delimited continuations in OchaCaml, Haskell and
-Caml from Asai/Kiselyov is available [3].
+A general tutorial on delimited continuations in OchaCaml (with code
+in Haskell and OCaml) from Asai/Kiselyov is available [3].
 
 -}
 
