@@ -13,7 +13,9 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Delimited.html
 </p><p>Functions of type <code>a -&gt; <code><a href="Control-Delimited.html#t:Delim">Delim</a></code> s t b</code> can be thought of as
  functions of type <code>a / s -&gt; b / t</code>, which means given an <code>a</code> we
  return a <code>b</code>, changing the <em>answer type</em> of the continuation from
- <code>s</code> to <code>t</code>.
+ <code>s</code> to <code>t</code>. The take away from this is that the <code>s</code> and <code>t</code>
+ variables representing the input and output answer type,
+ respectively.
 </p><p>If a <code><a href="Control-Delimited.html#t:Delim">Delim</a></code> does not capture the computation using one of the
  various <code>shift</code> operators (or <code>shift</code> does not change the answer
  type,) then the term is <em>polymorphic</em> in the answer type.
@@ -25,7 +27,8 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Delimited.html
  polymorphic (in this case, the answer type of the enclosing <code><a href="Control-Delimited.html#v:reset">reset</a></code>
  is <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Int.html#t:Int">Int</a></code>.)
 </p></div><div class="subs instances"><p id="control.i:Delim" class="caption collapser" onclick="toggleSection('i:Delim')">Instances</p><div id="section.i:Delim" class="show"><table><tr><td class="src"><a href="Control-Indexed-Monad.html#t:Monad-39-">Monad'</a> <a href="Control-Delimited.html#t:Delim">Delim</a></td><td class="doc"><p>Delimited continuations form a parameterized <code><a href="Control-Indexed-Monad.html#t:Monad-39-">Monad'</a></code>.
-</p></td></tr></table></div></div></div><div class="top"><p class="src"><a name="v:reset" class="def">reset</a> ::  <a href="Control-Delimited.html#t:Delim">Delim</a> s t s -&gt; <a href="Control-Delimited.html#t:Delim">Delim</a> s' s' t<a href="src/Control-Delimited.html#reset" class="link">Source</a></p><div class="doc"><p>Delimit a computation.
+</p></td></tr></table></div></div></div><div class="top"><p class="src"><a name="v:reset" class="def">reset</a> ::  <a href="Control-Delimited.html#t:Delim">Delim</a> s t s -&gt; <a href="Control-Delimited.html#t:Delim">Delim</a> s' s' t<a href="src/Control-Delimited.html#reset" class="link">Source</a></p><div class="doc"><p>Delimit a computation. The type variable <code>s'</code> indicates that
+ <code><a href="Control-Delimited.html#v:reset">reset</a></code> is polymorphic in its answer type.
 </p></div></div><h2 id="g:2">A family of shift operators
 </h2><div class="top"><p class="src"><a name="v:shift0" class="def">shift0</a> ::  ((b -&gt; s) -&gt; t) -&gt; <a href="Control-Delimited.html#t:Delim">Delim</a> s t b<a href="src/Control-Delimited.html#shift0" class="link">Source</a></p><div class="doc"><p>Clear the current continuation and invoke our handler with it
  bound as a parameter.
