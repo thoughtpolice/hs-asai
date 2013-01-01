@@ -32,27 +32,46 @@ module Control.Delimited
 
 import Control.Indexed.Monad
 
--- | The type of a delimited continuation, which is answer-type polymorphic.
+-- | The type of a delimited continuation, which is answer-type
+-- polymorphic.
 --
 -- Functions of type @a -> 'Delim' s t b@ can be thought of as
 -- functions of type @a \/ s -> b \/ t@, which means given an @a@ we
--- return a @b@, changing the /answer type/ of the continuation from
--- @s@ to @t@. The take away from this is that the @s@ and @t@
+-- return @b@, changing the /answer type/ of the delimited computation
+-- from @s@ to @t@. The take away from this is that the @s@ and @t@
 -- variables representing the input and output answer type,
--- respectively.
+-- respectively. (This notation is used in both OchaCaml and the
+-- definition of Asai's lambda/shift calculus.)
 --
--- If a 'Delim' does not capture the computation using one of the
--- various @shift@ operators (or @shift@ does not change the answer
--- type,) then the term is /polymorphic/ in the answer type.
+-- If a 'Delim' operation does not capture the computation using one
+-- of the various @shift@ operators (or @shift@ does not change the
+-- answer type,) then the term is /polymorphic/ in the answer type.
+--
+-- Consider a term like:
+--
+-- @
+-- reset $ [...] !>>= \\r -> ret $ r ++ \" world\"
+-- @
+--
+-- Here, the answer type of the enclosing 'reset' is 'String'. If the
+-- hole (specified by @[...]@) does not have a @shift@ operator, or
+-- the @shift@ operator does not change the answer type, then the type
+-- of the hole is answer type polymorphic: the hole cannot change the
+-- answer type of the enclosing 'reset'.
+--
+-- To make this clearer, consider using a @shift@ operator to return
+-- the delimited continuation to the outer 'reset' (which does not
+-- modify the answer type, since we can only invoke @k@ to return an
+-- 'Int'):
 --
 -- >>> :t runDelim $ reset $ shift2 (\k -> ret k) !>>= \r -> ret (r + (1::Int))
 -- runDelim $ reset $ shift2 (\k -> ret k) !>>= \r -> ret (r + (1::Int))
 --   :: Int -> Delim a' a' Int
 --
 -- Note how the quantified variable @a'@ is both the input and output
--- answer type: thus, @k@ will work with any answer type and is
--- polymorphic (in this case, the answer type of the enclosing 'reset'
--- is 'Int'.)
+-- answer type of @k@: thus, it cannot change the answer type (here we use
+-- 'shift2' which features a rank-2 type, perfectly matching the same
+-- kind of type you would see in OchaCaml.)
 newtype Delim s t b
   = Delim { unDelim :: (b -> s) -> t }
 
