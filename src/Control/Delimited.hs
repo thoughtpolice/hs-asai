@@ -37,7 +37,9 @@ import Control.Indexed.Monad
 -- Functions of type @a -> 'Delim' s t b@ can be thought of as
 -- functions of type @a \/ s -> b \/ t@, which means given an @a@ we
 -- return a @b@, changing the /answer type/ of the continuation from
--- @s@ to @t@.
+-- @s@ to @t@. The take away from this is that the @s@ and @t@
+-- variables representing the input and output answer type,
+-- respectively.
 --
 -- If a 'Delim' does not capture the computation using one of the
 -- various @shift@ operators (or @shift@ does not change the answer
@@ -59,7 +61,8 @@ instance Monad' Delim where
   ret x            = Delim (\k -> k x)
   bind (Delim f) h = Delim (\k -> f (\s -> unDelim (h s) k))
 
--- | Delimit a computation.
+-- | Delimit a computation. The type variable @s'@ indicates that
+-- 'reset' is polymorphic in its answer type.
 reset :: Delim s t s -> Delim s' s' t
 reset (Delim f) = Delim (\k -> k (f id))
 
