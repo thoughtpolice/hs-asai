@@ -101,17 +101,11 @@ redefine <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Pre
 other operators too. Here's an example (you'll need to fix the
 <code>LANGUAGE</code> pragma yourself on the first line, since Haddock eats it
 otherwise):
-</p><pre> [-# LANGUAGE RebindableSyntax #-]
+</p><pre> [-# LANGUAGE RebindableSyntax, NoImplicitPrelude #-]
  module Foo where
- import Prelude hiding (return, fail, (&gt;&gt;=), (=&lt;&lt;), (&gt;&gt;))
- import Control.Delimited
 
- -- Aspects of RebindableSyntax
- (&gt;&gt;=)    = (!&gt;&gt;=)
- (=&lt;&lt;)    = (=&lt;&lt;!)
- (&gt;&gt;)     = (!&gt;&gt;)
- return x = ret x
- fail   x = fail' x
+ import Control.Indexed.Prelude
+ import Control.Delimited
 
  -- Now use 'do' notation instead of the indexed bind/return
  -- functions.
@@ -142,7 +136,12 @@ calculus.)
 </p><p>Strictly speaking, the rank-2 type is probably not necessary, but it
 is not very controversial either, and it makes the intent much
 clearer.
-</p><p>You do not need to enable <code>RankNTypes</code> to use this package.
+</p><p>You do not <em>necessarily</em> need to enable <code>RankNTypes</code> to use this
+package, but in certain cases where you need to be polymorphic over
+recursive uses of <code><a href="Control-Delimited.html#t:Delim">Delim</a></code> for example, it will be necessary to
+quantify the answer type variables with a rank-2 type. However,
+because the provided family of <code>shift</code> operators is equivalent, you
+should be able to get by without <code>RankNTypes</code> should you choose.
 </p></div><h1 id="g:9">References
 </h1><div class="doc"><ol><li> <em>Genuine shift\reset in Haskell98</em>, by Kiselyov, on <em>haskell-cafe</em>:
      <a href="http://okmij.org/ftp/continuations/implementations.html#genuine-shift">http://okmij.org/ftp/continuations/implementations.html#genuine-shift</a>
