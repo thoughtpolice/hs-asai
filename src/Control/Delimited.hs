@@ -19,6 +19,7 @@ module Control.Delimited
        , reset     -- :: Delim s t s -> Delim s' s' t
 
          -- ** A family of shift operators
+         -- $shiftfamily
        , shift0    -- :: ((b -> s) -> t) -> Delim s t b
        , shift1    -- :: ((b -> s) -> Delim a t a) -> Delim s t b
        , shift2    -- :: ((b -> forall a'.  Delim a' a' s) -> Delim a t a) -> Delim s t b
@@ -81,10 +82,38 @@ instance Monad' Delim where
   ret x            = Delim (\k -> k x)
   bind (Delim f) h = Delim (\k -> f (\s -> unDelim (h s) k))
 
--- | Delimit a computation. The type variable @s'@ indicates that
+-- | Delimit a computation. The type variable @a@ indicates that
 -- 'reset' is polymorphic in its answer type.
 reset :: Delim s t s -> Delim a a t
 reset (Delim f) = Delim (\k -> k (f id))
+
+{- $shiftfamily
+
+There exists not one, but a family of @shift@ operators for delimited
+continuations, which range in the purity of their constituent
+continuation parameters and output types, from most pure to most
+impure. This family of operators can be used to define each other in a
+stepwise manner.
+
+Briefly, 'shift0' is the \"most pure @shift@ of all\" in that the
+delimited computation is completely pure. We may then use 'shift0' to
+build the definition of 'shift1', and use 'shift1' to build the
+definition of 'shift2', and so on until 'shift3'.
+
+We may then use 'shift3', the \"most impure @shift@ of all\", to walk
+back downards and define 'shift2', and use 'shift2' to describe
+'shift1' and so on and so forth.
+
+We offer the full family of @shift@ operators here, and where
+appropriate we use rank-2 typing to ensure the answer types of a
+computation are polymorphic (strictly speaking this likely isn't
+necessary, but it makes the type signature far more clear and is
+fairly non-controversial.)
+
+(Many thanks go to Leon P Smith who showed me notes describing this
+family and \'zipper\' of @shift@ operators.)
+
+-}
 
 -- | Clear the current continuation and invoke our handler with it
 -- bound as a parameter.
