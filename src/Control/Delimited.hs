@@ -22,7 +22,7 @@ module Control.Delimited
        , shift0    -- :: ((b -> s) -> t) -> Delim s t b
        , shift1    -- :: ((b -> s) -> Delim a t a) -> Delim s t b
        , shift2    -- :: ((b -> forall a'.  Delim a' a' s) -> Delim a t a) -> Delim s t b
-       , shift3    -- :: ((Delim s t b -> Delim s t s) -> Delim a t a) -> Delim s t b
+       , shift3    -- :: ((forall a'. Delim a' a' b -> Delim a' a' s) -> Delim a t a) -> Delim s t b
 
          -- ** Executing delimited computations
        , runDelim  -- :: Delim t t t -> t
@@ -123,7 +123,10 @@ shift2 f = shift1 (\k -> f (ret . k))
 -- the definition of @withSubCont@ in Amr Sabry's paper \"A Monadic
 -- Framework for Delimited Continuations\", available in the
 -- @CC-delcont@ package.
-shift3 :: ((Delim s t b -> Delim s t s) -> Delim a t a) -> Delim s t b
+--
+-- Like 'shift2', this uses Rank-2 polymorphism to ensure that the
+-- continuation @k@ is polymorphic in its answer type.
+shift3 :: ((forall a'. Delim a' a' b -> Delim a' a' s) -> Delim a t a) -> Delim s t b
 shift3 f = shift2 (\k -> f (!>>= k))
 
 -- | Run a delimited computation.
