@@ -89,7 +89,7 @@ reset (Delim f) = Delim (\k -> k (f id))
 
 {- $shiftfamily
 
-There exists not one, but a family of /equivalent @shift@ operators
+There exists not one, but a family of /equivalent/ @shift@ operators
 for delimited continuations, which range in the purity of their
 constituent continuation parameters and output types, from most pure
 to most impure. This family of operators can be used to define each
