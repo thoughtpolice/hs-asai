@@ -9,7 +9,7 @@
 -- Portability : Rank-2 types required
 --
 -- Delimited continuations featuring answer-type polymorphism, via
--- parameterized monads.
+-- indexed monads.
 --
 -- There is a tutorial available in "Control.Delimited.Tutorial".
 --
@@ -77,8 +77,8 @@ import Control.Indexed.Monad
 newtype Delim s t b
   = Delim { unDelim :: (b -> s) -> t }
 
--- | Delimited continuations form a parameterized 'Monad''.
-instance Monad' Delim where
+-- | Delimited continuations form a indexed 'IxMonad'.
+instance IxMonad Delim where
   ret x          = Delim (\k -> k x)
   Delim f !>>= h = Delim (\k -> f (\s -> unDelim (h s) k))
 

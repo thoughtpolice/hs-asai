@@ -57,7 +57,7 @@ ans2' = runDelim $ do
 
 -- Append example, with monadic syntax
 
-appnd :: Monad' m => [a] -> Delim b ([a] -> m a' a' b) [a]
+appnd :: IxMonad m => [a] -> Delim b ([a] -> m a' a' b) [a]
 appnd []       = shift1 (\k -> return (return . k))
 appnd (a:rest) = do
   r <- appnd rest

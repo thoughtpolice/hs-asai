@@ -29,7 +29,7 @@ module Control.Delimited.Tutorial
          -- * Other notes
          -- $othernotes
 
-         -- ** Parameterized monads
+         -- ** Indexed monads
          -- $pmonads
 
          -- ** Using @do@-notation
@@ -75,7 +75,7 @@ which implements truly polymorphic @shift@ and @reset@ operators, via
 /answer type polymorphism/, which allows the results of a delimited
 computation to vary.
 
-This implementation (using parameterized monads) was first implemented
+This implementation (using indexed monads) was first implemented
 by - and this package derived from - Oleg Kiselyov [1]. It directly
 implements the typing rules of Kenichi Asai's lambda/shift calculus
 [2], featuring answer type polymorphism and modification.
@@ -114,7 +114,7 @@ Lorem ipsum...
 {- $othernotes
 
 Here we discuss some of the design aspects of the library,
-particularly for those wondering why we need parameterized (or
+particularly for those wondering why we need indexed (or
 /indexed/) monads, and how we can reconcile this with @do@-notation.
 
 -}
@@ -157,11 +157,10 @@ But we can never say:
 
 because @e@ is fixed to 'String'.
 
-Parameterized (or /indexed/) monads solve this problem by
-\'expanding\' the kind of @m@ in the 'Monad' typeclass. It is defined
-as:
+Indexed monads solve this problem by \'expanding\' the kind of @m@ in
+the 'Monad' typeclass. The result is 'IxMonad', which is defined as:
 
-> class Monad' (m :: * -> * -> * -> *) where
+> class IxMonad (m :: * -> * -> * -> *) where
 >   ret    :: t -> m a a t
 >   (!>>=) :: m b g s -> (s -> m a b t) -> m a g t
 
@@ -182,7 +181,7 @@ computations may change the output answer type.
 {- $donotation
 
 It's possible to use GHC's @RebindableSyntax@ extension to re-define
-@do@ notation to use the 'Monad'' type class.
+@do@ notation to use the 'IxMonad' type class.
 
 Begin your module by hiding the regular 'Monad' methods, and then
 redefine 'Prelude.>>=' and 'Prelude.return'. Feel free to redefine
@@ -205,7 +204,7 @@ otherwise):
 > -- Now use 'do' notation instead of the indexed bind/return
 > -- functions.
 >
-> -- You can lift regular monads into parameterized monads using
+> -- You can lift regular monads into indexed monads using
 > -- 'lift' and 'runI'
 > io1 :: IO ()
 > io1 = runI $ do

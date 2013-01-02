@@ -7,76 +7,76 @@
 -- Stability   : experimental
 -- Portability : portable
 --
--- Parameterized monads.
+-- Indexed monads.
 --
 -- When using @RebindableSyntax@ with GHC, it's possible to overload
--- regular @do@-notation to use the 'Monad'' typeclass. See the
+-- regular @do@-notation to use the 'IxMonad' typeclass. See the
 -- section \"Using @do@-notation\" in the tutorial module
 -- "Control.Delimited.Tutorial".
 --
 module Control.Indexed.Monad
-       ( -- * Parameterized monads
-         Monad'(..) -- :: (* -> * -> * -> *) -> Constraint
+       ( -- * Indexed monads
+         IxMonad(..) -- :: (* -> * -> * -> *) -> Constraint
 
          -- ** Lifting ordinary monads
-       , MW         -- :: (* -> *) -> * -> * -> * -> *
-       , lift       -- :: Monad m => m a -> MW m s t a
-       , runI       -- :: Monad m => MW m s t a -> m a
+       , MW          -- :: (* -> *) -> * -> * -> * -> *
+       , lift        -- :: IxMonad m => m a -> MW m s t a
+       , runI        -- :: IxMonad m => MW m s t a -> m a
 
          -- * Operators
-       , (!>=>)     -- :: Monad' m => (a -> m t u b) -> (b -> m s t c) -> (a -> m s u c)
-       , (<=<!)     -- :: Monad' m => (b -> m s t c) -> (a -> m t u b) -> (a -> m s u c)
-       , (=<<!)     -- :: Monad' m => (a -> m s t b) -> m t u a -> m s u b
+       , (!>=>)      -- :: IxMonad m => (a -> m t u b) -> (b -> m s t c) -> (a -> m s u c)
+       , (<=<!)      -- :: IxMonad m => (b -> m s t c) -> (a -> m t u b) -> (a -> m s u c)
+       , (=<<!)      -- :: IxMonad m => (a -> m s t b) -> m t u a -> m s u b
        ) where
 
 --------------------------------------------------------------------------------
--- Parameterized monads.
+-- Indexed monads.
 
--- | Parameterized monads.
+-- | Indexed monads.
 --
 -- Regular monads can be lifted into this type class using 'lift'.
-class Monad' m where
-  -- | Parameterized 'Prelude.>>='.
+class IxMonad m where
+  -- | Indexed 'Prelude.>>='.
   (!>>=) :: m t u a -> (a -> m s t b) -> m s u b
-  -- | Parameterized 'Prelude.>>'.
+  -- | Indexed 'Prelude.>>'.
   (!>>) ::m t u a -> m s t b -> m s u b
   f !>> g = f !>>= const g
-  -- | Parameterized 'Prelude.return'.
+  -- | Indexed 'Prelude.return'.
   ret  :: a -> m s s a
-  -- | Parameterized 'Prelude.fail'.
+  -- | Indexed 'Prelude.fail'.
   fail' :: String -> m s s a
   fail' s = error s
 
 infixl 1 !>>=
 infixl 1 !>>
 
--- | This type lifts any regular monad into a parameterized monad.
+-- | This type lifts any regular monad into a indexed monad.
 newtype MW m s t a = MW { unMW :: m a }
 
--- | This method \'lifts\' a regular monad into a parameterized monad
--- 'MW' which is an instance of 'Monad''.
+-- | This method \'lifts\' a regular monad into a indexed monad
+-- 'MW' which is an instance of 'IxMonad'.
 lift :: Monad m => m a -> MW m s t a
 lift = MW
 
--- | This demotes a parameterized monad into a regular monad. Useful
+-- | This demotes a indexed monad into a regular monad. Useful
 -- for when you're using e.g. @RebindableSyntax@ and want to do IO.
 runI :: Monad m => MW m s t a -> m a
 runI = unMW
 
 -- | This instances simply lifts regular instances of 'Monad'
--- into instances of 'Monad''.
-instance Monad m => Monad' (MW m) where
+-- into instances of 'IxMonad'.
+instance Monad m => IxMonad (MW m) where
   ret       x = MW (return x)
   MW m !>>= f = MW (m >>= unMW . f)
 
 -- | Left-to-right Kleisli composition of indexed monads.
-(!>=>) :: Monad' m => (a -> m t u b) -> (b -> m s t c) -> (a -> m s u c)
+(!>=>) :: IxMonad m => (a -> m t u b) -> (b -> m s t c) -> (a -> m s u c)
 f !>=> g = \x -> f x !>>= g
 
 -- | Right-to-left Kleisli composition of indexed monads.
-(<=<!) :: Monad' m => (b -> m s t c) -> (a -> m t u b) -> (a -> m s u c)
+(<=<!) :: IxMonad m => (b -> m s t c) -> (a -> m t u b) -> (a -> m s u c)
 (<=<!) = flip (!>=>)
 
 -- | Right-to-left version of '!>>='.
-(=<<!) :: Monad' m => (a -> m s t b) -> m t u a -> m s u b
+(=<<!) :: IxMonad m => (a -> m s t b) -> m t u a -> m s u b
 (=<<!) = flip (!>>=)
