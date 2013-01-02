@@ -36,6 +36,7 @@ library
     Control.Delimited
     Control.Delimited.Tutorial
     Control.Indexed.Monad
+    Control.Indexed.Prelude
   build-depends:
     base >= 4
 

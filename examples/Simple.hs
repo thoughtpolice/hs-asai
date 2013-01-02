@@ -1,15 +1,9 @@
-{-# LANGUAGE RebindableSyntax #-}
+{-# LANGUAGE RebindableSyntax, NoImplicitPrelude #-}
 module Simple where
 import Prelude hiding (return, fail, (>>=), (=<<), (>>))
+import Control.Indexed.Prelude
+
 import Control.Delimited
-
--- Aspects of RebindableSyntax
-
-(>>=)    = (!>>=)
-(=<<)    = (=<<!)
-(>>)     = (!>>)
-return x = ret x
-fail   x = fail' x
 
 -- Test of compatibility with Prelude
 

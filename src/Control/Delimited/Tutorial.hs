@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -w #-}
-{-# LANGUAGE RebindableSyntax #-}
+{-# LANGUAGE RebindableSyntax, NoImplicitPrelude #-}
 -- |
 -- Module      : Control.Delimited.Tutorial
 -- Copyright   : (c) Oleg Kiselyov 2007-2012, (c) Austin Seipp 2012
@@ -41,17 +41,10 @@ module Control.Delimited.Tutorial
          -- * References
          -- $refs
        ) where
-import Prelude hiding (return, fail, (>>=), (=<<))
+import Prelude hiding (return, fail, (>>=), (=<<), (>>))
+import Control.Indexed.Prelude
+
 import Control.Delimited
-
---
--- Aspects of RebindableSyntax
---
-
-m >>= f  = m !>>= f
-return x = ret x
-fail x   = error x
-f =<< m  = m !>>= f
 
 {- $intro
 
@@ -189,17 +182,12 @@ other operators too. Here's an example (you'll need to fix the
 @LANGUAGE@ pragma yourself on the first line, since Haddock eats it
 otherwise):
 
-> [-# LANGUAGE RebindableSyntax #-]
+> [-# LANGUAGE RebindableSyntax, NoImplicitPrelude #-]
 > module Foo where
 > import Prelude hiding (return, fail, (>>=), (=<<), (>>))
-> import Control.Delimited
+> import Control.Indexed.Prelude
 >
-> -- Aspects of RebindableSyntax
-> (>>=)    = (!>>=)
-> (=<<)    = (=<<!)
-> (>>)     = (!>>)
-> return x = ret x
-> fail   x = fail' x
+> import Control.Delimited
 >
 > -- Now use 'do' notation instead of the indexed bind/return
 > -- functions.
