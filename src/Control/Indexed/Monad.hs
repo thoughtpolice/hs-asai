@@ -25,7 +25,7 @@ module Control.Indexed.Monad
 
          -- * Operators
        , (!>>=)     -- :: Monad' m => m t u a -> (a -> m s t b) -> m s u b
-       , (!>=>)     -- :: Monad' m => m t u a -> m s t b -> m s u b
+       , (!>>)      -- :: Monad' m => m t u a -> m s t b -> m s u b
        ) where
 
 --------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ instance Monad m => Monad' (MW m) where
 m !>>= f = bind m f
 infixl 1 !>>=
 
--- | Kleisli composition for indexed monads.
-(!>=>) :: Monad' m => m t u a -> m s t b -> m s u b
-m1 !>=> m2 = m1 !>>= const m2
-infixl 1 !>=>
+-- | 'Prelude.>>' for indexed monads.
+(!>>) :: Monad' m => m t u a -> m s t b -> m s u b
+m1 !>> m2 = m1 !>>= const m2
+infixl 1 !>>
