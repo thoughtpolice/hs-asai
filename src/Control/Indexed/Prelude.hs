@@ -20,7 +20,7 @@ module Control.Indexed.Prelude
        , return -- :: IxMonad m => a -> m s s a
        , fail   -- :: IxMonad m => Prelude.String -> m s s a
 
-         -- * The prelude itself.
+         -- * The prelude itself
        , module Prelude
        ) where
 
