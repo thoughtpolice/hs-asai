@@ -8,5 +8,4 @@ Maintainer:
 
 Thanks go to:
 
-  Leon P Smith
-
+  Leon P Smith - provided insight into the family of shift operators
