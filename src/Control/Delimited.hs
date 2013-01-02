@@ -22,6 +22,7 @@ module Control.Delimited
        , shift0    -- :: ((b -> s) -> t) -> Delim s t b
        , shift1    -- :: ((b -> s) -> Delim a t a) -> Delim s t b
        , shift2    -- :: ((b -> forall a'.  Delim a' a' s) -> Delim a t a) -> Delim s t b
+       , shift3    -- :: ((Delim s t b -> Delim s t s) -> Delim a t a) -> Delim s t b
 
          -- ** Executing delimited computations
        , runDelim  -- :: Delim t t t -> t
@@ -82,33 +83,48 @@ instance Monad' Delim where
 
 -- | Delimit a computation. The type variable @s'@ indicates that
 -- 'reset' is polymorphic in its answer type.
-reset :: Delim s t s -> Delim s' s' t
+reset :: Delim s t s -> Delim a a t
 reset (Delim f) = Delim (\k -> k (f id))
 
 -- | Clear the current continuation and invoke our handler with it
 -- bound as a parameter.
 --
--- This is the most pure definition of @shift@.
+-- This is the most pure definition of @shift@: both the continuation
+-- @k@ and the enclosed body are pure.
 shift0 :: ((b -> s) -> t) -> Delim s t b
 shift0 f = Delim f
 
 -- | Clear the current continuation and invoke our handler with it
 -- bound as a parameter.
 --
--- This is a simple Haskell98 definition of @shift@ that does not enforce
--- true answer type polymorphism by abstracting over the internal 's' and
--- 't' type variables.
+-- This definition of @shift@ prohibits the continuation @k@ from
+-- being monadic, while allowing the body to be monadic (this means
+-- @k@ is trivially polymorphic in its answer type, while remaining
+-- Haskell98.) For this reason it is less pure than 'shift0' but more
+-- pure than 'shift2'.
 shift1 :: ((b -> s) -> Delim a t a) -> Delim s t b
-shift1 f = Delim (\k -> unDelim (f k) id)
+shift1 f = shift0 (\k -> unDelim (f k) id)
 
 -- | Clear the current continuation and invoke our handler with it
--- bound as a paramter.
+-- bound as a parameter.
 --
--- This definition of @shift@ uses Rank-2 types to ensure the answer
--- type is in fact polymorphic: note the type of the captured continuation
--- is @Delim t' t' s@.
-shift2 :: ((b -> forall a'.  Delim a' a' s) -> Delim a t a) -> Delim s t b
-shift2 f = Delim (\k -> unDelim (f $ \t -> ret (k t)) id)
+-- This definition of @shift@ is the most "genuine" as it perfectly
+-- encapsulates the typing rules of Asai's lambda/shift calculus using
+-- Rank-2 polymorphism: the continuation's answer type is fully
+-- polymorphic.
+shift2 :: ((b -> forall a'. Delim a' a' s) -> Delim a t a) -> Delim s t b
+shift2 f = shift1 (\k -> f (ret . k))
+
+-- | Clear the current continuation and invoke our handler with it
+-- bound as a parameter.
+--
+-- This is the most impure definition of @shift@ in that all
+-- components of the delimited computation are monadic. It is akin to
+-- the definition of @withSubCont@ in Amr Sabry's paper "A Monadic
+-- Framework for Delimited Continuations", available in the
+-- @CC-delcont@ package.
+shift3 :: ((Delim s t b -> Delim s t s) -> Delim a t a) -> Delim s t b
+shift3 f = shift2 (\k -> f (!>>= k))
 
 -- | Run a delimited computation.
 runDelim :: Delim t t t -> t
