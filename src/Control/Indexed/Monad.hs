@@ -17,9 +17,9 @@
 module Control.Indexed.Monad
        ( -- * Parameterized monads
          Monad'(..) -- :: (* -> * -> * -> *) -> Constraint
-       , MW         -- :: (* -> *) -> * -> * -> * -> *
 
          -- ** Lifting ordinary monads
+       , MW         -- :: (* -> *) -> * -> * -> * -> *
        , lift       -- :: Monad m => m a -> MW m s t a
        , runI       -- :: Monad m => MW m s t a -> m a
 
