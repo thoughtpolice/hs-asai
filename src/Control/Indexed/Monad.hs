@@ -47,8 +47,7 @@ class IxMonad m where
   fail' :: String -> m s s a
   fail' s = error s
 
-infixl 1 !>>=
-infixl 1 !>>
+infixl 1 !>>=, !>>
 
 -- | This type lifts any regular monad into a indexed monad.
 newtype MW m s t a = MW { unMW :: m a }
@@ -80,3 +79,5 @@ f !>=> g = \x -> f x !>>= g
 -- | Right-to-left version of '!>>='.
 (=<<!) :: IxMonad m => (a -> m s t b) -> m t u a -> m s u b
 (=<<!) = flip (!>>=)
+
+infixr 1 <=<!, !>=>, =<<!
