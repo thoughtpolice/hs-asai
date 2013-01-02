@@ -225,7 +225,12 @@ Strictly speaking, the rank-2 type is probably not necessary, but it
 is not very controversial either, and it makes the intent much
 clearer.
 
-You do not need to enable @RankNTypes@ to use this package.
+You do not *necessarily* need to enable @RankNTypes@ to use this
+package, but in certain cases where you need to be polymorphic over
+recursive uses of 'Delim' for example, it will be necessary to
+quantify the answer type variables with a rank-2 type. However,
+because the provided family of @shift@ operators is equivalent, you
+should be able to get by without @RankNTypes@ should you choose.
 
 -}
 
