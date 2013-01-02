@@ -108,7 +108,7 @@ shift1 f = shift0 (\k -> unDelim (f k) id)
 -- | Clear the current continuation and invoke our handler with it
 -- bound as a parameter.
 --
--- This definition of @shift@ is the most "genuine" as it perfectly
+-- This definition of @shift@ is the most \"genuine\" as it perfectly
 -- encapsulates the typing rules of Asai's lambda/shift calculus using
 -- Rank-2 polymorphism: the continuation's answer type is fully
 -- polymorphic.
@@ -120,8 +120,8 @@ shift2 f = shift1 (\k -> f (ret . k))
 --
 -- This is the most impure definition of @shift@ in that all
 -- components of the delimited computation are monadic. It is akin to
--- the definition of @withSubCont@ in Amr Sabry's paper "A Monadic
--- Framework for Delimited Continuations", available in the
+-- the definition of @withSubCont@ in Amr Sabry's paper \"A Monadic
+-- Framework for Delimited Continuations\", available in the
 -- @CC-delcont@ package.
 shift3 :: ((Delim s t b -> Delim s t s) -> Delim a t a) -> Delim s t b
 shift3 f = shift2 (\k -> f (!>>= k))
