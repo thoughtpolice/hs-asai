@@ -162,17 +162,18 @@ Parameterized (or /indexed/) monads solve this problem by
 as:
 
 > class Monad' (m :: * -> * -> * -> *) where
->   ret  :: t -> m a a t
->   bind :: m b g s -> (s -> m a b t) -> m a g t
+>   ret    :: t -> m a a t
+>   (!>>=) :: m b g s -> (s -> m a b t) -> m a g t
 
 Note the new type variables: these represent the input and output
 answer types of a delimited computation. We can see that 'ret' is
 fully polymorphic in its answer type: a statement of @ret foo@ in a
 'Delim' simply does not change the answer type at all. Note the answer
-types present in 'Control.Indexed.Monad.bind': we have @a b@ and @b
-g@, meaning we can get an overall answer type of @a g@.
+types present in 'Control.Indexed.Monad.!>>=': we have an answer type
+of @a b@ and @b g@, meaning we can get an overall answer type of @a
+g@.
 
-This polymorphism in the definition of 'Control.Indexed.Monad.bind' is
+This polymorphism in the definition of 'Control.Indexed.Monad.!>>=' is
 what gives us answer type polymorphism: it means delimited
 computations may change the output answer type.
 
@@ -195,11 +196,11 @@ otherwise):
 > import Control.Delimited
 >
 > -- Aspects of RebindableSyntax
+> (>>=)    = (!>>=)
+> (=<<)    = (=<<!)
+> (>>)     = (!>>)
 > return x = ret x
-> fail s   = error s
-> m >>= f  = m !>>= f
-> f =<< m  = m !>>= f
-> f >> k   = m !>>= \_ -> k
+> fail   x = fail' x
 >
 > -- Now use 'do' notation instead of the indexed bind/return
 > -- functions.
@@ -227,9 +228,17 @@ more examples.
 {- $rankntypes
 
 This package requires GHC's @RankNTypes@ extension, as it uses a
-rank-2 type for the definition of 'Control.Delimited.shift2'. The
-original implementation by Kiselyov is Haskell98. You do not need to
-enable @RankNTypes@ to use this package.
+rank-2 type for the definition of the @shift@ operators 'shift2' and
+'shift3'. The original implementation by Kiselyov is Haskell98 (he
+defines @shift@ as the 'shift1' provided in this package, as opposed
+to 'shift2' which matches the typing rules of the lambda/shift
+calculus.)
+
+Strictly speaking, the rank-2 type is probably not necessary, but it
+is not very controversial either, and it makes the intent much
+clearer.
+
+You do not need to enable @RankNTypes@ to use this package.
 
 -}
 

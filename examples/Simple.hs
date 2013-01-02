@@ -5,11 +5,11 @@ import Control.Delimited
 
 -- Aspects of RebindableSyntax
 
+(>>=)    = (!>>=)
+(=<<)    = (=<<!)
+(>>)     = (!>>)
 return x = ret x
-fail x   = error x
-m >>= f  = m !>>= f
-f =<< m  = m !>>= f
-f >> k   = f !>>= \_ -> k
+fail   x = fail' x
 
 -- Test of compatibility with Prelude
 

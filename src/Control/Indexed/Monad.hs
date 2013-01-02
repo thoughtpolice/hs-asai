@@ -24,8 +24,9 @@ module Control.Indexed.Monad
        , runI       -- :: Monad m => MW m s t a -> m a
 
          -- * Operators
-       , (!>>=)     -- :: Monad' m => m t u a -> (a -> m s t b) -> m s u b
-       , (!>>)      -- :: Monad' m => m t u a -> m s t b -> m s u b
+       , (!>=>)     -- :: Monad' m => (a -> m t u b) -> (b -> m s t c) -> (a -> m s u c)
+       , (<=<!)     -- :: Monad' m => (b -> m s t c) -> (a -> m t u b) -> (a -> m s u c)
+       , (=<<!)     -- :: Monad' m => (a -> m s t b) -> m t u a -> m s u b
        ) where
 
 --------------------------------------------------------------------------------
@@ -35,10 +36,19 @@ module Control.Indexed.Monad
 --
 -- Regular monads can be lifted into this type class using 'lift'.
 class Monad' m where
+  -- | Parameterized 'Prelude.>>='.
+  (!>>=) :: m t u a -> (a -> m s t b) -> m s u b
+  -- | Parameterized 'Prelude.>>'.
+  (!>>) ::m t u a -> m s t b -> m s u b
+  f !>> g = f !>>= const g
   -- | Parameterized 'Prelude.return'.
   ret  :: a -> m s s a
-  -- | Parameterized 'Prelude.>>='.
-  bind :: m t u a -> (a -> m s t b) -> m s u b
+  -- | Parameterized 'Prelude.fail'.
+  fail' :: String -> m s s a
+  fail' s = error s
+
+infixl 1 !>>=
+infixl 1 !>>
 
 -- | This type lifts any regular monad into a parameterized monad.
 newtype MW m s t a = MW { unMW :: m a }
@@ -56,15 +66,17 @@ runI = unMW
 -- | This instances simply lifts regular instances of 'Monad'
 -- into instances of 'Monad''.
 instance Monad m => Monad' (MW m) where
-  ret         x = MW (return x)
-  bind (MW m) f = MW (m >>= unMW . f)
+  ret       x = MW (return x)
+  MW m !>>= f = MW (m >>= unMW . f)
 
--- | Infix synonym for 'bind'.
-(!>>=) :: Monad' m => m t u a -> (a -> m s t b) -> m s u b
-m !>>= f = bind m f
-infixl 1 !>>=
+-- | Left-to-right Kleisli composition of indexed monads.
+(!>=>) :: Monad' m => (a -> m t u b) -> (b -> m s t c) -> (a -> m s u c)
+f !>=> g = \x -> f x !>>= g
 
--- | 'Prelude.>>' for indexed monads.
-(!>>) :: Monad' m => m t u a -> m s t b -> m s u b
-m1 !>> m2 = m1 !>>= const m2
-infixl 1 !>>
+-- | Right-to-left Kleisli composition of indexed monads.
+(<=<!) :: Monad' m => (b -> m s t c) -> (a -> m t u b) -> (a -> m s u c)
+(<=<!) = flip (!>=>)
+
+-- | Right-to-left version of '!>>='.
+(=<<!) :: Monad' m => (a -> m s t b) -> m t u a -> m s u b
+(=<<!) = flip (!>>=)

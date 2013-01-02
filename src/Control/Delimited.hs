@@ -79,8 +79,8 @@ newtype Delim s t b
 
 -- | Delimited continuations form a parameterized 'Monad''.
 instance Monad' Delim where
-  ret x            = Delim (\k -> k x)
-  bind (Delim f) h = Delim (\k -> f (\s -> unDelim (h s) k))
+  ret x          = Delim (\k -> k x)
+  Delim f !>>= h = Delim (\k -> f (\s -> unDelim (h s) k))
 
 -- | Delimit a computation. The type variable @a@ indicates that
 -- 'reset' is polymorphic in its answer type.
@@ -139,7 +139,7 @@ shift1 f = shift0 (\k -> unDelim (f k) id)
 --
 -- This definition of @shift@ is the most \"genuine\" as it perfectly
 -- encapsulates the typing rules of Asai's lambda/shift calculus using
--- Rank-2 polymorphism: the continuation's answer type is fully
+-- rank-2 polymorphism: the continuation's answer type is fully
 -- polymorphic.
 shift2 :: ((b -> forall a'. Delim a' a' s) -> Delim a t a) -> Delim s t b
 shift2 f = shift1 (\k -> f (ret . k))
@@ -153,7 +153,7 @@ shift2 f = shift1 (\k -> f (ret . k))
 -- Framework for Delimited Continuations\", available in the
 -- @CC-delcont@ package.
 --
--- Like 'shift2', this uses Rank-2 polymorphism to ensure that the
+-- Like 'shift2', this uses rank-2 polymorphism to ensure that the
 -- continuation @k@ is polymorphic in its answer type.
 shift3 :: ((forall a'. Delim a' a' b -> Delim a' a' s) -> Delim a t a) -> Delim s t b
 shift3 f = shift2 (\k -> f (!>>= k))
