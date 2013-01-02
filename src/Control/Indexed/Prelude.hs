@@ -24,7 +24,7 @@ module Control.Indexed.Prelude
        , module Prelude
        ) where
 
-import qualified Prelude hiding (return, fail, (>>=), (=<<), (>>))
+import Prelude hiding (return, fail, (>>=), (=<<), (>>))
 import Control.Delimited
 
 -- | Indexed Prelude 'Prelude.>>='.

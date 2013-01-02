@@ -41,9 +41,8 @@ module Control.Delimited.Tutorial
          -- * References
          -- $refs
        ) where
-import Prelude hiding (return, fail, (>>=), (=<<), (>>))
-import Control.Indexed.Prelude
 
+import Control.Indexed.Prelude
 import Control.Delimited
 
 {- $intro
@@ -184,9 +183,8 @@ otherwise):
 
 > [-# LANGUAGE RebindableSyntax, NoImplicitPrelude #-]
 > module Foo where
-> import Prelude hiding (return, fail, (>>=), (=<<), (>>))
-> import Control.Indexed.Prelude
 >
+> import Control.Indexed.Prelude
 > import Control.Delimited
 >
 > -- Now use 'do' notation instead of the indexed bind/return

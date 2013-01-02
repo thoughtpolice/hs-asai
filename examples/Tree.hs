@@ -49,5 +49,5 @@ walk1 t = go (walk_tree t)
 6
 3
 7
-*Tree> 
+*Tree>
 -}
