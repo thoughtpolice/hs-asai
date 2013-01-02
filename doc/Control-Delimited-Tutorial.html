@@ -82,15 +82,16 @@ type <code>Either e :: * -&gt; *</code>. If you have something like:
 'expanding' the kind of <code>m</code> in the <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> typeclass. It is defined
 as:
 </p><pre> class Monad' (m :: * -&gt; * -&gt; * -&gt; *) where
-   ret  :: t -&gt; m a a t
-   bind :: m b g s -&gt; (s -&gt; m a b t) -&gt; m a g t
+   ret    :: t -&gt; m a a t
+   (!&gt;&gt;=) :: m b g s -&gt; (s -&gt; m a b t) -&gt; m a g t
 </pre><p>Note the new type variables: these represent the input and output
 answer types of a delimited computation. We can see that <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> is
 fully polymorphic in its answer type: a statement of <code>ret foo</code> in a
 <code><a href="Control-Delimited.html#t:Delim">Delim</a></code> simply does not change the answer type at all. Note the answer
-types present in <code><a href="Control-Indexed-Monad.html#t:bind">bind</a></code>: we have <code>a b</code> and <code>b
-g</code>, meaning we can get an overall answer type of <code>a g</code>.
-</p><p>This polymorphism in the definition of <code><a href="Control-Indexed-Monad.html#t:bind">bind</a></code> is
+types present in <code><a href="Control-Indexed-Monad.html#t:-33--62--62--61-">!&gt;&gt;=</a></code>: we have an answer type
+of <code>a b</code> and <code>b g</code>, meaning we can get an overall answer type of <code>a
+g</code>.
+</p><p>This polymorphism in the definition of <code><a href="Control-Indexed-Monad.html#t:-33--62--62--61-">!&gt;&gt;=</a></code> is
 what gives us answer type polymorphism: it means delimited
 computations may change the output answer type.
 </p></div><h2 id="g:7">Using <code>do</code>-notation
@@ -107,11 +108,11 @@ otherwise):
  import Control.Delimited
 
  -- Aspects of RebindableSyntax
+ (&gt;&gt;=)    = (!&gt;&gt;=)
+ (=&lt;&lt;)    = (=&lt;&lt;!)
+ (&gt;&gt;)     = (!&gt;&gt;)
  return x = ret x
- fail s   = error s
- m &gt;&gt;= f  = m !&gt;&gt;= f
- f =&lt;&lt; m  = m !&gt;&gt;= f
- f &gt;&gt; k   = m !&gt;&gt;= \_ -&gt; k
+ fail   x = fail' x
 
  -- Now use 'do' notation instead of the indexed bind/return
  -- functions.
@@ -134,9 +135,15 @@ otherwise):
 more examples.
 </p></div><h2 id="g:8">Rank-2 typing
 </h2><div class="doc"><p>This package requires GHC's <code>RankNTypes</code> extension, as it uses a
-rank-2 type for the definition of <code><a href="Control-Delimited.html#v:shift2">shift2</a></code>. The
-original implementation by Kiselyov is Haskell98. You do not need to
-enable <code>RankNTypes</code> to use this package.
+rank-2 type for the definition of the <code>shift</code> operators <code><a href="Control-Delimited.html#v:shift2">shift2</a></code> and
+<code><a href="Control-Delimited.html#v:shift3">shift3</a></code>. The original implementation by Kiselyov is Haskell98 (he
+defines <code>shift</code> as the <code><a href="Control-Delimited.html#v:shift1">shift1</a></code> provided in this package, as opposed
+to <code><a href="Control-Delimited.html#v:shift2">shift2</a></code> which matches the typing rules of the lambda/shift
+calculus.)
+</p><p>Strictly speaking, the rank-2 type is probably not necessary, but it
+is not very controversial either, and it makes the intent much
+clearer.
+</p><p>You do not need to enable <code>RankNTypes</code> to use this package.
 </p></div><h1 id="g:9">References
 </h1><div class="doc"><ol><li> <em>Genuine shift\reset in Haskell98</em>, by Kiselyov, on <em>haskell-cafe</em>:
      <a href="http://okmij.org/ftp/continuations/implementations.html#genuine-shift">http://okmij.org/ftp/continuations/implementations.html#genuine-shift</a>
