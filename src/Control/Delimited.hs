@@ -89,11 +89,11 @@ reset (Delim f) = Delim (\k -> k (f id))
 
 {- $shiftfamily
 
-There exists not one, but a family of @shift@ operators for delimited
-continuations, which range in the purity of their constituent
-continuation parameters and output types, from most pure to most
-impure. This family of operators can be used to define each other in a
-stepwise manner.
+There exists not one, but a family of @shift@ /equivalent/ operators
+for delimited continuations, which range in the purity of their
+constituent continuation parameters and output types, from most pure
+to most impure. This family of operators can be used to define each
+other in a stepwise manner.
 
 Briefly, 'shift0' is the \"most pure @shift@ of all\" in that the
 delimited computation is completely pure. We may then use 'shift0' to
@@ -157,6 +157,21 @@ shift2 f = shift1 (\k -> f (ret . k))
 -- continuation @k@ is polymorphic in its answer type.
 shift3 :: ((forall a'. Delim a' a' b -> Delim a' a' s) -> Delim a t a) -> Delim s t b
 shift3 f = shift2 (\k -> f (!>>= k))
+
+{--
+
+-- The 'reverse' family of shift operators can also be defined:
+
+shift2' :: ((b -> forall a'. Delim a' a' s) -> Delim a t a) -> Delim s t b
+shift2' f = shift3 (\k -> f (k . ret))
+
+shift1' :: ((b -> s) -> Delim a t a) -> Delim s t b
+shift1' f = shift2' (\k -> f (runDelim . k))
+
+shift0' :: ((b -> s) -> t) -> Delim s t b
+shift0' f = shift1' (ret . f)
+
+--}
 
 -- | Run a delimited computation.
 runDelim :: Delim t t t -> t
