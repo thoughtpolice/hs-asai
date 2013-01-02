@@ -18,7 +18,7 @@
 <a name="line-9"></a><span class='hs-comment'>-- Portability : Rank-2 types required</span>
 <a name="line-10"></a><span class='hs-comment'>--</span>
 <a name="line-11"></a><span class='hs-comment'>-- Delimited continuations featuring answer-type polymorphism, via</span>
-<a name="line-12"></a><span class='hs-comment'>-- parameterized monads.</span>
+<a name="line-12"></a><span class='hs-comment'>-- indexed monads.</span>
 <a name="line-13"></a><span class='hs-comment'>--</span>
 <a name="line-14"></a><span class='hs-comment'>-- There is a tutorial available in "Control.Delimited.Tutorial".</span>
 <a name="line-15"></a><span class='hs-comment'>--</span>
@@ -86,8 +86,8 @@
 <a name="line-77"></a><a name="Delim"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>Delim</span> <span class='hs-varid'>s</span> <span class='hs-varid'>t</span> <span class='hs-varid'>b</span>
 <a name="line-78"></a>  <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Delim</span> <span class='hs-layout'>{</span> <span class='hs-varid'>unDelim</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>s</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>t</span> <span class='hs-layout'>}</span>
 <a name="line-79"></a>
-<a name="line-80"></a><a name="instance%20Monad'%20Delim"></a><span class='hs-comment'>-- | Delimited continuations form a parameterized 'Monad''.</span>
-<a name="line-81"></a><a name="instance%20Monad'%20Delim"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Monad'</span> <span class='hs-conid'>Delim</span> <span class='hs-keyword'>where</span>
+<a name="line-80"></a><a name="instance%20IxMonad%20Delim"></a><span class='hs-comment'>-- | Delimited continuations form a indexed 'IxMonad'.</span>
+<a name="line-81"></a><a name="instance%20IxMonad%20Delim"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>IxMonad</span> <span class='hs-conid'>Delim</span> <span class='hs-keyword'>where</span>
 <a name="line-82"></a>  <span class='hs-varid'>ret</span> <span class='hs-varid'>x</span>          <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Delim</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-varid'>k</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>k</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span>
 <a name="line-83"></a>  <span class='hs-conid'>Delim</span> <span class='hs-varid'>f</span> <span class='hs-varop'>!&gt;&gt;=</span> <span class='hs-varid'>h</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Delim</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-varid'>k</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>f</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-varid'>s</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>unDelim</span> <span class='hs-layout'>(</span><span class='hs-varid'>h</span> <span class='hs-varid'>s</span><span class='hs-layout'>)</span> <span class='hs-varid'>k</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
 <a name="line-84"></a>

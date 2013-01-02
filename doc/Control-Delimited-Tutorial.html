@@ -6,7 +6,7 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Delimited-Tuto
 </a><ul><li><a href="#g:3">Part 1
 </a></li><li><a href="#g:4">Part 2
 </a></li></ul></li><li><a href="#g:5">Other notes
-</a><ul><li><a href="#g:6">Parameterized monads
+</a><ul><li><a href="#g:6">Indexed monads
 </a></li><li><a href="#g:7">Using <code>do</code>-notation
 </a></li><li><a href="#g:8">Rank-2 typing
 </a></li></ul></li><li><a href="#g:9">References
@@ -31,7 +31,7 @@ continuations. This package provides a delimited continuation monad
 which implements truly polymorphic <code>shift</code> and <code>reset</code> operators, via
 <em>answer type polymorphism</em>, which allows the results of a delimited
 computation to vary.
-</p><p>This implementation (using parameterized monads) was first implemented
+</p><p>This implementation (using indexed monads) was first implemented
 by - and this package derived from - Oleg Kiselyov [1]. It directly
 implements the typing rules of Kenichi Asai's lambda/shift calculus
 [2], featuring answer type polymorphism and modification.
@@ -51,9 +51,9 @@ traditional delimited continuation monad is available in the
 </code></strong>&quot;hello&quot;
 </pre></div><h1 id="g:5">Other notes
 </h1><div class="doc"><p>Here we discuss some of the design aspects of the library,
-particularly for those wondering why we need parameterized (or
+particularly for those wondering why we need indexed (or
 <em>indexed</em>) monads, and how we can reconcile this with <code>do</code>-notation.
-</p></div><h2 id="g:6">Parameterized monads
+</p></div><h2 id="g:6">Indexed monads
 </h2><div class="doc"><p>While reading this tutorial, you may wonder why we use special
 operators (like <code><a href="Control-Indexed-Monad.html#v:-33--62--62--61-">!&gt;&gt;=</a></code> that mimmick <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Prelude.html#t:-62--62--61-">&gt;&gt;=</a></code>) for delimited
 computations, instead of regular operators from the <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code>
@@ -78,10 +78,9 @@ type <code>Either e :: * -&gt; *</code>. If you have something like:
 </pre><p>But we can never say:
 </p><pre> x &lt;- Left False
 </pre><p>because <code>e</code> is fixed to <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code>.
-</p><p>Parameterized (or <em>indexed</em>) monads solve this problem by
-'expanding' the kind of <code>m</code> in the <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> typeclass. It is defined
-as:
-</p><pre> class Monad' (m :: * -&gt; * -&gt; * -&gt; *) where
+</p><p>Indexed monads solve this problem by 'expanding' the kind of <code>m</code> in
+the <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> typeclass. The result is <code><a href="Control-Indexed-Monad.html#t:IxMonad">IxMonad</a></code>, which is defined as:
+</p><pre> class IxMonad (m :: * -&gt; * -&gt; * -&gt; *) where
    ret    :: t -&gt; m a a t
    (!&gt;&gt;=) :: m b g s -&gt; (s -&gt; m a b t) -&gt; m a g t
 </pre><p>Note the new type variables: these represent the input and output
@@ -96,7 +95,7 @@ what gives us answer type polymorphism: it means delimited
 computations may change the output answer type.
 </p></div><h2 id="g:7">Using <code>do</code>-notation
 </h2><div class="doc"><p>It's possible to use GHC's <code>RebindableSyntax</code> extension to re-define
-<code>do</code> notation to use the <code><a href="Control-Indexed-Monad.html#t:Monad-39-">Monad'</a></code> type class.
+<code>do</code> notation to use the <code><a href="Control-Indexed-Monad.html#t:IxMonad">IxMonad</a></code> type class.
 </p><p>Begin your module by hiding the regular <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> methods, and then
 redefine <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Prelude.html#t:-62--62--61-">&gt;&gt;=</a></code> and <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Prelude.html#t:return">return</a></code>. Feel free to redefine
 other operators too. Here's an example (you'll need to fix the
@@ -117,7 +116,7 @@ otherwise):
  -- Now use 'do' notation instead of the indexed bind/return
  -- functions.
 
- -- You can lift regular monads into parameterized monads using
+ -- You can lift regular monads into indexed monads using
  -- 'lift' and 'runI'
  io1 :: IO ()
  io1 = runI $ do
