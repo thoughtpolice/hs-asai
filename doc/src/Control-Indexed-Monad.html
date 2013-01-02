@@ -34,7 +34,7 @@
 <a name="line-25"></a>
 <a name="line-26"></a>         <span class='hs-comment'>-- * Operators</span>
 <a name="line-27"></a>       <span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varop'>!&gt;&gt;=</span><span class='hs-layout'>)</span>     <span class='hs-comment'>-- :: Monad' m =&gt; m t u a -&gt; (a -&gt; m s t b) -&gt; m s u b</span>
-<a name="line-28"></a>       <span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varop'>!&gt;=&gt;</span><span class='hs-layout'>)</span>     <span class='hs-comment'>-- :: Monad' m =&gt; m t u a -&gt; m s t b -&gt; m s u b</span>
+<a name="line-28"></a>       <span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varop'>!&gt;&gt;</span><span class='hs-layout'>)</span>      <span class='hs-comment'>-- :: Monad' m =&gt; m t u a -&gt; m s t b -&gt; m s u b</span>
 <a name="line-29"></a>       <span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
 <a name="line-30"></a>
 <a name="line-31"></a><span class='hs-comment'>--------------------------------------------------------------------------------</span>
@@ -73,9 +73,9 @@
 <a name="line-64"></a><a name="m"></a><span class='hs-definition'>m</span> <span class='hs-varop'>!&gt;&gt;=</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>bind</span> <span class='hs-varid'>m</span> <span class='hs-varid'>f</span>
 <a name="line-65"></a><span class='hs-keyword'>infixl</span> <span class='hs-num'>1</span> <span class='hs-varop'>!&gt;&gt;=</span>
 <a name="line-66"></a>
-<a name="line-67"></a><a name="!%3e=%3e"></a><span class='hs-comment'>-- | Kleisli composition for indexed monads.</span>
-<a name="line-68"></a><span class='hs-layout'>(</span><span class='hs-varop'>!&gt;=&gt;</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Monad'</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>t</span> <span class='hs-varid'>u</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>s</span> <span class='hs-varid'>t</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>s</span> <span class='hs-varid'>u</span> <span class='hs-varid'>b</span>
-<a name="line-69"></a><a name="m1"></a><span class='hs-definition'>m1</span> <span class='hs-varop'>!&gt;=&gt;</span> <span class='hs-varid'>m2</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>m1</span> <span class='hs-varop'>!&gt;&gt;=</span> <span class='hs-varid'>const</span> <span class='hs-varid'>m2</span>
-<a name="line-70"></a><span class='hs-keyword'>infixl</span> <span class='hs-num'>1</span> <span class='hs-varop'>!&gt;=&gt;</span>
+<a name="line-67"></a><a name="!%3e%3e"></a><span class='hs-comment'>-- | 'Prelude.&gt;&gt;' for indexed monads.</span>
+<a name="line-68"></a><span class='hs-layout'>(</span><span class='hs-varop'>!&gt;&gt;</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Monad'</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>t</span> <span class='hs-varid'>u</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>s</span> <span class='hs-varid'>t</span> <span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>m</span> <span class='hs-varid'>s</span> <span class='hs-varid'>u</span> <span class='hs-varid'>b</span>
+<a name="line-69"></a><a name="m1"></a><span class='hs-definition'>m1</span> <span class='hs-varop'>!&gt;&gt;</span> <span class='hs-varid'>m2</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>m1</span> <span class='hs-varop'>!&gt;&gt;=</span> <span class='hs-varid'>const</span> <span class='hs-varid'>m2</span>
+<a name="line-70"></a><span class='hs-keyword'>infixl</span> <span class='hs-num'>1</span> <span class='hs-varop'>!&gt;&gt;</span>
 </pre></body>
 </html>
