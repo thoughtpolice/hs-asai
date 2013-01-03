@@ -9,9 +9,9 @@
 -- Stability   : experimental
 -- Portability : portable
 --
--- This module provides a brief introductory tutorial in the
--- \"Introduction\" section, followed by some discussion behind the
--- theory of the library with references.
+-- This module provides an introductory tutorial in the
+-- \"Introduction\" section and beyond, followed by examples, and by
+-- some discussion behind the theory of the library with references.
 --
 module Control.Delimited.Tutorial
        ( -- * Introduction
@@ -62,6 +62,13 @@ import Control.Delimited
 
 {- $intro
 
+@asai@ is a minimal library for /delimited continuations/, a 'slice'
+of a continuation that can be invoked as a function and composed.
+
+-}
+
+{- $callcc-primer
+
 Continuations are a well known abstraction for 'picking up where you
 left off.' When you use @call/cc@ traditionally in something like
 scheme, you pass it a function @f@ which receives a function @k@, and
@@ -92,10 +99,6 @@ in Haskell and OCaml) from Asai/Kiselyov is available [3]. A more
 traditional delimited continuation monad is available in the
 @CC-delcont@ package [4]. The @CC-delcont@ tutorial [5] serves
 as a basis for this tutorial (thanks to Dan Doel!)
-
--}
-
-{- $callcc-primer
 
 -}
 
@@ -141,7 +144,51 @@ Lorem ipsum...
 
 {- $example-btrees
 
-Lorem ipsum...
+Here, we will...
+
+> {-# LANGUAGE RankNTypes #-}
+> -- Walking trees with coroutines.
+> -- Based on:
+> --    <http://okmij.org/ftp/continuations/ContExample.hs>
+> module Tree where
+>
+> import Control.Delimited
+>
+> -- Binary trees
+> data Tree a
+>   = Leaf
+>   | Node (Tree a) (Tree a) a
+>   deriving (Show, Eq)
+>
+> make_tree :: Int -> Tree Int
+> make_tree j = go j 1
+>   where go 0 _ = Leaf
+>         go i x = Node (go (i-1) $ 2*x) (go (i-1) $ 2*x+1) x
+>
+> tree1 = make_tree 3
+> tree2 = make_tree 4
+>
+> -- Coroutines as lazy monadic lists.
+> data Coro a
+>   = Done
+>   | Resume a (forall s. Delim s s (Coro a))
+>
+> walk_tree x = runDelim (walk_tree' x !>> ret Done)
+>
+> walk_tree' Leaf = ret ()
+> walk_tree' (Node l r x) =
+>   walk_tree' l !>>
+>   yield x      !>>
+>   walk_tree' r
+>   where
+>     yield n = shift2 (\k -> ret $ Resume n $ k ())
+>
+> walk1 t = go (walk_tree t)
+>   where
+>     go Done         = return ()
+>     go (Resume x k) = print x >> go (runDelim k)
+
+The full code is available in @examples/Tree.hs@.
 
 -}
 
