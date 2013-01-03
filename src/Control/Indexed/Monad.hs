@@ -14,6 +14,12 @@
 -- section \"Using @do@-notation\" in the tutorial module
 -- "Control.Delimited.Tutorial".
 --
+-- Currently, indexed transformers are not provided. In the future,
+-- this module may be replaced by the @indexed@ or @index-core@
+-- libraries which provide more general types while still having
+-- @do@-notation, and providing transformers. In light of that, this
+-- module will be expanded as needed.
+--
 module Control.Indexed.Monad
        ( -- * Indexed monads
          IxMonad(..) -- :: (* -> * -> * -> *) -> Constraint
