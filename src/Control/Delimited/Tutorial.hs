@@ -17,14 +17,26 @@ module Control.Delimited.Tutorial
        ( -- * Introduction
          -- $intro
 
-         -- * Delimited continuations
-         -- $delimcc
+         -- * An primer on continuations
+         -- $callcc-primer
 
-         -- ** Part 1
-         -- $pt1
+         -- ** Undelimited
+         -- $primer-callcc
 
-         -- ** Part 2
-         -- $pt2
+         -- ** Delimited
+         -- $primer-delimcc
+
+         -- * Examples
+         -- $examples
+
+         -- ** Simple answer-type modification
+         -- $example-simple
+
+         -- ** First-class @printf@
+         -- $example-printf
+
+         -- ** Walking binary trees
+         -- $example-btrees
 
          -- * Other notes
          -- $othernotes
@@ -37,6 +49,9 @@ module Control.Delimited.Tutorial
 
          -- ** Rank-2 typing
          -- $rankntypes
+
+         -- * Further reading
+         -- $morereading
 
          -- * References
          -- $refs
@@ -75,17 +90,22 @@ implements the typing rules of Kenichi Asai's lambda/shift calculus
 A general tutorial on delimited continuations in OchaCaml (with code
 in Haskell and OCaml) from Asai/Kiselyov is available [3]. A more
 traditional delimited continuation monad is available in the
-@CC-delcont@ package [4].
+@CC-delcont@ package [4]. The @CC-delcont@ tutorial [5] serves
+as a basis for this tutorial (thanks to Dan Doel!)
 
 -}
 
-{- $delimcc
+{- $callcc-primer
+
+-}
+
+{- $primer-callcc
 
 Lorem ipsum...
 
 -}
 
-{- $pt1
+{- $primer-delimcc
 
 Lorem ipsum...
 
@@ -94,12 +114,34 @@ Lorem ipsum...
 
 -}
 
-{- $pt2
+{- $examples
+
+In the subsequent sections, we'll cover some examples of using this
+library in a few simple forms, which should form a basis for reasoning
+about how to use it. The same ideas should apply to other delimited
+continuation libraries or interfaces (i.e. scheme, ocaml, ochacaml,
+etc.)
+
+-}
+
+{- $example-simple
 
 Lorem ipsum...
 
 >>> runDelim $ reset $ shift1 (\_ -> return "hello") >>= \r -> return (r + 1)
 "hello"
+
+-}
+
+{- $example-printf
+
+Lorem ipsum...
+
+-}
+
+{- $example-btrees
+
+Lorem ipsum...
 
 -}
 
@@ -232,6 +274,12 @@ should be able to get by without @RankNTypes@ should you choose.
 
 -}
 
+{- $morereading
+
+Lorem ipsum...
+
+-}
+
 {- $refs
 
   1. /Genuine shift\reset in Haskell98/, by Kiselyov, on /haskell-cafe/:
@@ -244,5 +292,7 @@ should be able to get by without @RankNTypes@ should you choose.
       <http://okmij.org/ftp/continuations/index.html#tutorial>
 
   4. /CC-delcont: Delimited continuations and dynamically scoped variables/: <http://hackage.haskell.org/package/CC-delcont>
+
+  5. /CC-delcont introduction: <http://www.haskell.org/haskellwiki/Library/CC-delcont#CC-delcont>
 
 -}

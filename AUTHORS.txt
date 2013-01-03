@@ -6,6 +6,11 @@ Maintainer:
 
   Austin Seipp <mad [dot] one [@at] gmail [dot] com>
 
-Thanks go to:
+Special thanks go to:
 
-  Leon P Smith - provided insight into the family of shift operators
+  Leon P Smith - provided code which gave insight into
+    the family of shift operators
+
+  Dan Doel - his library served as a great basis for
+    using delimited continuations in Haskell, and his
+    CC-delcont tutorial inspired mine.
