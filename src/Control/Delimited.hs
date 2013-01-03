@@ -25,6 +25,9 @@ module Control.Delimited
        , shift2    -- :: ((b -> forall a'.  Delim a' a' s) -> Delim a t a) -> Delim s t b
        , shift3    -- :: ((forall a'. Delim a' a' b -> Delim a' a' s) -> Delim a t a) -> Delim s t b
 
+         -- ** Traditional @call/cc@
+       , callCC    -- :: ((b -> Delim u s a) -> Delim s t b) -> Delim s t b
+
          -- ** Executing delimited computations
        , runDelim  -- :: Delim t t t -> t
 
@@ -172,6 +175,12 @@ shift0' :: ((b -> s) -> t) -> Delim s t b
 shift0' f = shift1' (ret . f)
 
 --}
+
+-- | Traditional @call/cc@ operator.
+--
+-- This is defined in terms of 'shift0'.
+callCC :: ((b -> Delim u s a) -> Delim s t b) -> Delim s t b
+callCC f = shift0 (\k -> unDelim (f (\a -> shift0 $ \_ -> k a)) k)
 
 -- | Run a delimited computation.
 runDelim :: Delim t t t -> t
