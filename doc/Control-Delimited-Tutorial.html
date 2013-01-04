@@ -19,7 +19,7 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Delimited-Tuto
  &quot;Introduction&quot; section and beyond, followed by examples, and by
  some discussion behind the theory of the library with references.
 </p></div></div><div id="synopsis"><p id="control.syn" class="caption expander" onclick="toggleSection('syn')">Synopsis</p><ul id="section.syn" class="hide" onclick="toggleSection('syn')"></ul></div><div id="interface"><h1 id="g:1">Introduction
-</h1><div class="doc"><p><code>asai</code> is a minimal library for <em>delimited continuations</em>, a <code>slice</code>
+</h1><div class="doc"><p><code>asai</code> is a minimal library for <em>delimited continuations</em>, a 'slice'
 of a continuation that can be invoked as a function and composed.
 </p></div><h1 id="g:2">An primer on continuations
 </h1><div class="doc"><p>Continuations are a well known abstraction for 'picking up where you
@@ -28,12 +28,11 @@ scheme, you pass it a function <code>f</code> which receives a function <code>k<
 when <code>k</code> is invoked you 'call the continuation' and return where
 <code>call/cc</code> left off. In this sense, <code>k</code> is a reification of the state
 you were in when you invoked <code>f</code>.
-</p><p>But <code>call/cc</code> is, as some say, 'overrated.' For one, it is not
-possible to return a value from the continuation; you merely pick up
-where you left off. By fixing this we get delimited continuations: an
-abstraction that allows us to slice up a continuation and compose
-them. But at this point, we suffer in a statically typed language: the
-type of <code>shift</code> and <code>reset</code> are not polymorphic in their return.
+</p><p>But there is another type of continuation: a delimited one. With
+delimited continuations, it is possible to exert control over the
+exact <em>frame</em> of the computation that is captured. By being able to
+slice just small execution contexts, we can compose delimited
+continuations very easily.
 </p><p>In the same way that continuations form a monad, so do delimited
 continuations. This package provides a delimited continuation monad
 which implements truly polymorphic <code>shift</code> and <code>reset</code> operators, via
@@ -197,12 +196,9 @@ calculus.)
 </p><p>Strictly speaking, the rank-2 type is probably not necessary, but it
 is not very controversial either, and it makes the intent much
 clearer.
-</p><p>You do not <em>necessarily</em> need to enable <code>RankNTypes</code> to use this
-package, but in certain cases where you need to be polymorphic over
-recursive uses of <code><a href="Control-Delimited.html#t:Delim">Delim</a></code> for example, it will be necessary to
-quantify the answer type variables with a rank-2 type. However,
-because the provided family of <code>shift</code> operators is equivalent, you
-should be able to get by without <code>RankNTypes</code> should you choose.
+</p><p>For a lot of cases, you will need to use <code>RankNTypes</code> if you want to
+abstract over the answer type variables properly (for example, in a
+recursive data structure.)
 </p></div><h1 id="g:13">Further reading
 </h1><div class="doc"><p>Lorem ipsum...
 </p></div><h1 id="g:14">References
@@ -213,5 +209,5 @@ should be able to get by without <code>RankNTypes</code> should you choose.
 </li><li> <em>Introduction to programming with shift and reset</em>, by Kiselyov, Asai, in <em>CW2011</em>:
       <a href="http://okmij.org/ftp/continuations/index.html#tutorial">http://okmij.org/ftp/continuations/index.html#tutorial</a>
 </li><li> <em>CC-delcont: Delimited continuations and dynamically scoped variables</em>: <a href="http://hackage.haskell.org/package/CC-delcont">http://hackage.haskell.org/package/CC-delcont</a>
-</li><li> <em>CC-delcont introduction: &lt;http:</em><em>www.haskell.org</em>haskellwiki<em>Library</em>CC-delcont#CC-delcont&gt;
+</li><li> <em>CC-delcont introduction</em>: <a href="http://www.haskell.org/haskellwiki/Library/CC-delcont#CC-delcont">http://www.haskell.org/haskellwiki/Library/CC-delcont#CC-delcont</a>
 </li></ol></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.13.1</p></div></body></html>
