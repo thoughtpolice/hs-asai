@@ -33,6 +33,10 @@ module Control.Indexed.Monad
        , (!>=>)      -- :: IxMonad m => (a -> m t u b) -> (b -> m s t c) -> (a -> m s u c)
        , (<=<!)      -- :: IxMonad m => (b -> m s t c) -> (a -> m t u b) -> (a -> m s u c)
        , (=<<!)      -- :: IxMonad m => (a -> m s t b) -> m t u a -> m s u b
+
+         -- * Other functions
+       , liftIxM     -- :: IxMonad m => (a -> b) -> m s t a -> m s t b
+       , liftIxM2    -- :: IxMonad m => (a -> b -> c) -> m t u a -> m s t b -> m s u c
        ) where
 
 --------------------------------------------------------------------------------
@@ -87,3 +91,11 @@ f !>=> g = \x -> f x !>>= g
 (=<<!) = flip (!>>=)
 
 infixr 1 <=<!, !>=>, =<<!
+
+-- | This is 'Control.Monad.liftM' for indexed monads.
+liftIxM :: IxMonad m => (a -> b) -> m s t a -> m s t b
+liftIxM f e = e !>>= ret . f
+
+-- | This is 'Control.Monad.liftM2' for indexed monads.
+liftIxM2 :: IxMonad m => (a -> b -> c) -> m t u a -> m s t b -> m s u c
+liftIxM2 f e1 e2 = e1 !>>= \x -> e2 !>>= \y -> ret (f x y)
