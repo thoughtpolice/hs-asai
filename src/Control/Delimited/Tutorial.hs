@@ -62,7 +62,7 @@ import Control.Delimited
 
 {- $intro
 
-@asai@ is a minimal library for /delimited continuations/, a 'slice'
+@asai@ is a minimal library for /delimited continuations/, a \'slice\'
 of a continuation that can be invoked as a function and composed.
 
 -}
@@ -76,12 +76,11 @@ when @k@ is invoked you 'call the continuation' and return where
 @call/cc@ left off. In this sense, @k@ is a reification of the state
 you were in when you invoked @f@.
 
-But @call/cc@ is, as some say, 'overrated.' For one, it is not
-possible to return a value from the continuation; you merely pick up
-where you left off. By fixing this we get delimited continuations: an
-abstraction that allows us to slice up a continuation and compose
-them. But at this point, we suffer in a statically typed language: the
-type of @shift@ and @reset@ are not polymorphic in their return.
+But there is another type of continuation: a delimited one. With
+delimited continuations, it is possible to exert control over the
+exact /frame/ of the computation that is captured. By being able to
+slice just small execution contexts, we can compose delimited
+continuations very easily.
 
 In the same way that continuations form a monad, so do delimited
 continuations. This package provides a delimited continuation monad
@@ -312,12 +311,9 @@ Strictly speaking, the rank-2 type is probably not necessary, but it
 is not very controversial either, and it makes the intent much
 clearer.
 
-You do not /necessarily/ need to enable @RankNTypes@ to use this
-package, but in certain cases where you need to be polymorphic over
-recursive uses of 'Delim' for example, it will be necessary to
-quantify the answer type variables with a rank-2 type. However,
-because the provided family of @shift@ operators is equivalent, you
-should be able to get by without @RankNTypes@ should you choose.
+For a lot of cases, you will need to use @RankNTypes@ if you want to
+abstract over the answer type variables properly (for example, in a
+recursive data structure.)
 
 -}
 
@@ -340,6 +336,6 @@ Lorem ipsum...
 
   4. /CC-delcont: Delimited continuations and dynamically scoped variables/: <http://hackage.haskell.org/package/CC-delcont>
 
-  5. /CC-delcont introduction: <http://www.haskell.org/haskellwiki/Library/CC-delcont#CC-delcont>
+  5. /CC-delcont introduction/: <http://www.haskell.org/haskellwiki/Library/CC-delcont#CC-delcont>
 
 -}
