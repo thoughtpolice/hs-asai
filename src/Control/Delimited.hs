@@ -1,7 +1,9 @@
 {-# LANGUAGE RankNTypes #-}
 -- |
 -- Module      : Control.Delimited
--- Copyright   : (c) Oleg Kiselyov 2007-2012, (c) Austin Seipp 2012
+-- Copyright   : (c) Oleg Kiselyov 2007-2012,
+--               (c) Austin Seipp 2012,
+--               (c) Leon P Smith 2012
 -- License     : MIT
 --
 -- Maintainer  : mad.one@gmail.com
