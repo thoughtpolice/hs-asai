@@ -10,8 +10,9 @@
 -- Portability : portable
 --
 -- This module provides an introductory tutorial in the
--- \"Introduction\" section and beyond, followed by examples, and by
--- some discussion behind the theory of the library with references.
+-- \"Introduction\" section and beyond, followed by examples. Finally,
+-- there's some discussion behind the theory and design of the
+-- library, with references.
 --
 module Control.Delimited.Tutorial
        ( -- * Introduction
@@ -227,7 +228,7 @@ test3, test4 :: String
 
 test3 = run $ sprintf ('ret' \"goodbye \" ^$ fmt str ^$ 'ret' \"!\") $$ \"world\"
 
-test4 = run $ sprintf (fmt str ^$ ret \" = \" ^$ fmt int) $$ \"x\" $$ 3
+test4 = run $ sprintf (fmt str ^$ 'ret' \" = \" ^$ fmt int) $$ \"x\" $$ 3
 @
 
 It is an error to pass a value of an incorrect type to the
@@ -270,8 +271,8 @@ walk_tree x = 'runDelim' (walk_tree' x '!>>' 'ret' Done)
 
 walk_tree' Leaf = 'ret' ()
 walk_tree' (Node l r x) =
-  walk_tree' l !>>
-  yield x      !>>
+  walk_tree' l '!>>'
+  yield x      '!>>'
   walk_tree' r
   where
     yield n = 'shift2' (\\k -> 'ret' $ Resume n $ k ())
