@@ -35,6 +35,7 @@ walk_tree' (Node l r x) =
   where
     yield n = shift2 (\k -> ret $ Resume n $ k ())
 
+walk1 :: Show a => Tree a -> IO ()
 walk1 t = go (walk_tree t)
   where
     go Done         = return ()

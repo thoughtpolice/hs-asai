@@ -16,14 +16,14 @@ io1 = runI $ do
 
 ans1 :: String
 ans1 = runDelim $ reset $ do
-  r <- shift1 (\_ -> return "hello")
+  r <- shift1 (const $ return "hello")
   return (r + 1)
 -- This is equivalent to the OchaCaml term:
 --   reset (fun () -> 1 + shift (fun _ -> "hello")) ;;
 
 ans1' :: String
 ans1' = runDelim $ reset $ do
-  r <- shift2 (\_ -> return "hello")
+  r <- shift2 (const $ return "hello")
   return (r + 1)
 
 ans2 :: Int

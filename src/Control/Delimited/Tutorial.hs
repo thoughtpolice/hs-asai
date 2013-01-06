@@ -109,10 +109,8 @@ Lorem ipsum...
 
 {- $primer-delimcc
 
-Lorem ipsum...
+Let us consider the expression:
 
->>> runDelim $ reset $ shift1 (\_ -> ret "hello") !>>= \r -> ret (r + 1)
-"hello"
 
 -}
 
@@ -145,47 +143,47 @@ Lorem ipsum...
 
 Here, we will...
 
-> {-# LANGUAGE RankNTypes #-}
-> -- Walking trees with coroutines.
-> -- Based on:
-> --    <http://okmij.org/ftp/continuations/ContExample.hs>
-> module Tree where
->
-> import Control.Delimited
->
-> -- Binary trees
-> data Tree a
->   = Leaf
->   | Node (Tree a) (Tree a) a
->   deriving (Show, Eq)
->
-> make_tree :: Int -> Tree Int
-> make_tree j = go j 1
->   where go 0 _ = Leaf
->         go i x = Node (go (i-1) $ 2*x) (go (i-1) $ 2*x+1) x
->
-> tree1 = make_tree 3
-> tree2 = make_tree 4
->
-> -- Coroutines as lazy monadic lists.
-> data Coro a
->   = Done
->   | Resume a (forall s. Delim s s (Coro a))
->
-> walk_tree x = runDelim (walk_tree' x !>> ret Done)
->
-> walk_tree' Leaf = ret ()
-> walk_tree' (Node l r x) =
->   walk_tree' l !>>
->   yield x      !>>
->   walk_tree' r
->   where
->     yield n = shift2 (\k -> ret $ Resume n $ k ())
->
-> walk1 t = go (walk_tree t)
->   where
->     go Done         = return ()
->     go (Resume x k) = print x >> go (runDelim k)
+@
+[-\# LANGUAGE RankNTypes \#-]
+module Tree where
+
+import Control.Delimited
+
+\-- Binary trees
+data Tree a
+  = Leaf
+  | Node (Tree a) (Tree a) a
+  deriving (Show, Eq)
+
+make_tree :: Int -> Tree Int
+make_tree j = go j 1
+  where go 0 _ = Leaf
+        go i x = Node (go (i-1) $ 2*x) (go (i-1) $ 2*x+1) x
+
+tree1 = make_tree 3
+tree2 = make_tree 4
+
+\-- Coroutines as monadic lists.
+data Coro a
+  = Done
+  | Resume a (forall s. 'Delim' s s (Coro a))
+
+walk_tree x = 'runDelim' (walk_tree' x '!>>' 'ret' Done)
+
+walk_tree' Leaf = 'ret' ()
+walk_tree' (Node l r x) =
+  walk_tree' l !>>
+  yield x      !>>
+  walk_tree' r
+  where
+    yield n = 'shift2' (\\k -> 'ret' $ Resume n $ k ())
+
+walk1 :: Show a => Tree a -> IO ()
+walk1 t = go (walk_tree t)
+  where
+    go Done         = return ()
+    go (Resume x k) = print x >> go ('runDelim' k)
+@
 
 The full code is available in @examples/Tree.hs@.
 
@@ -211,38 +209,50 @@ type of delimited computation is polymorphic, we need the monad to
 Consider the vanilla 'Monad' typeclass. It is defined like this (with
 explicit kind signatures):
 
-> class Monad (m :: * -> *) where ...
+@
+class 'Monad' (m :: * -> *) where ...
+@
 
 The @m@ type constructor abstracts over a single type variable. It is
 possible to make types with multiple type variables an instance of
 'Monad' of course, but their non-abstracted type variables must be
 fixed. As an example, considering the instance for @'Either' e@:
 
-> instance Monad (Either e) where ...
+@
+instance 'Monad' ('Either' e) where ...
+@
 
 Note the type variable @e@ is fixed over the definition of a term of
-type @Either e :: * -> *@. If you have something like:
+type @'Either' e :: * -> *@. If you have something like:
 
-> thing :: a -> Either String a
-> thing a = do
->   ...
+@
+thing :: a -> 'Either' String a
+thing a = do
+  ...
+@
 
 Then in the body we may say:
 
-> x <- Left "oh no!"
+@
+x <- Left \"oh no!\"
+@
 
 But we can never say:
 
-> x <- Left False
+@
+x <- Left False
+@
 
-because @e@ is fixed to 'String'.
+because @e@ is fixed to 'String'. Another example is that the 'Control.Monad.State.State' monad always has a fixed
 
 Indexed monads solve this problem by \'expanding\' the kind of @m@ in
 the 'Monad' typeclass. The result is 'IxMonad', which is defined as:
 
-> class IxMonad (m :: * -> * -> * -> *) where
->   ret    :: t -> m a a t
->   (!>>=) :: m b g s -> (s -> m a b t) -> m a g t
+@
+ class 'IxMonad' (m :: * -> * -> * -> *) where
+   'ret'    :: t -> m a a t
+   ('!>>=') :: m b g s -> (s -> m a b t) -> m a g t
+@
 
 Note the new type variables: these represent the input and output
 answer types of a delimited computation. We can see that 'ret' is
@@ -269,29 +279,29 @@ other operators too. Here's an example (you'll need to fix the
 @LANGUAGE@ pragma yourself on the first line, since Haddock eats it
 otherwise):
 
-> [-# LANGUAGE RebindableSyntax, NoImplicitPrelude #-]
-> module Foo where
->
-> import Control.Indexed.Prelude
-> import Control.Delimited
->
-> -- Now use 'do' notation instead of the indexed bind/return
-> -- functions.
->
-> -- You can lift regular monads into indexed monads using
-> -- 'lift' and 'runI'
-> io1 :: IO ()
-> io1 = runI $ do
->   lift $ putStrLn "hi!"
->   lift $ putStrLn "hi!"
->   return ()
->
-> test1 :: String
-> test1 = runDelim $ reset $ do
->   r <- shift1 (\_ -> return "hello")
->   return (r + 1)
-> -- This is equivalent to the OchaCaml term:
-> --   reset (fun () -> 1 + shift (fun _ -> "hello")) ;;
+@
+[-\# LANGUAGE RebindableSyntax \#-]
+module Foo where
+
+import Control.Indexed.Prelude
+import Control.Delimited
+
+\-- After importing the indexed prelude, we can use do notation
+
+\-- Lifting ordinary monads
+io1 :: IO ()
+io1 = 'runI' $ do
+  'lift' $ putStrLn \"hi!\"
+  'lift' $ putStrLn \"hi!\"
+  return ()
+
+test1 :: String
+test1 = 'runDelim' $ 'reset' $ do
+  r <- 'shift1' (const $ return \"hello\")
+  return (r + 1)
+\-- This is equivalent to the OchaCaml term:
+\--   reset (fun () -> 1 + shift (fun _ -> \"hello\")) ;;
+@
 
 See @examples/Simple.hs@ (included in the distribution) for several
 more examples.
