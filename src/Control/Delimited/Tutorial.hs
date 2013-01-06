@@ -20,9 +20,6 @@ module Control.Delimited.Tutorial
          -- * An primer on continuations
          -- $callcc-primer
 
-         -- ** Undelimited
-         -- $primer-callcc
-
          -- ** Delimited
          -- $primer-delimcc
 
@@ -101,12 +98,6 @@ as a basis for this tutorial (thanks to Dan Doel!)
 
 -}
 
-{- $primer-callcc
-
-Lorem ipsum...
-
--}
-
 {- $primer-delimcc
 
 Let us consider the expression:
@@ -126,10 +117,32 @@ etc.)
 
 {- $example-simple
 
-Lorem ipsum...
+Basic answer type modification is very simple to demonstrate.
+Consider that we @shift@ some computation and discard the continuation
+@k@. Then the answer type of the enclosing @'reset'@ changes to the
+return type of the @shift@ed block. For example:
 
->>> runDelim $ reset $ shift1 (\_ -> return "hello") >>= \r -> return (r + 1)
+>>> runDelim $ reset $ shift2 (\_ -> ret "hello") !>>= \r -> ret (r + 1)
 "hello"
+
+Here, the initial answer type of the enclosing @'reset'@ is initially
+@Int@, because the return of the reset is @Int@. However, we use
+@'shift2'@, which changes the answer type by /discarding/ the
+delimited continuation, and simply returning a @'String'@.
+
+On the other hand, it is also clear when the answer type is
+polymorphic and cannot be changed. Instead consider this example:
+
+>>> :t runDelim $ reset $ shift2 (\k -> ret k) !>>= \r -> ret (r + (1::Int))
+runDelim $ reset $ shift2 (\k -> ret k) !>>= \r -> ret (r + (1::Int))
+  :: Int -> Delim a' a' Int
+
+Here, the answer type is /not/ changed by the call to @'shift2'@: the
+continuation k is not discarded, but returned. This \'carries'\ the
+answer type variables with the value, enforcing the input and output
+answer types are the same. And so if we were to invoke @k@, then the
+answer type of the @'reset'@ may still only be 'Int': that is the only
+type of value we may place in the hole left by @'shift2'@.
 
 -}
 
