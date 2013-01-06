@@ -3,18 +3,17 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Delimited-Tuto
 //]]>
 </script></head><body><div id="package-header"><ul class="links" id="page-menu"><li><a href="src/Control-Delimited-Tutorial.html">Source</a></li><li><a href="index.html">Contents</a></li><li><a href="doc-index.html">Index</a></li></ul><p class="caption">asai-0.0.0.0: A minimal library for delimited continuations.</p></div><div id="content"><div id="module-header"><table class="info"><tr><th>Portability</th><td>portable</td></tr><tr><th>Stability</th><td>experimental</td></tr><tr><th>Maintainer</th><td>mad.one@gmail.com</td></tr><tr><th>Safe Haskell</th><td>Safe-Inferred</td></tr></table><p class="caption">Control.Delimited.Tutorial</p></div><div id="table-of-contents"><p class="caption">Contents</p><ul><li><a href="#g:1">Introduction
 </a></li><li><a href="#g:2">An primer on continuations
-</a><ul><li><a href="#g:3">Undelimited
-</a></li><li><a href="#g:4">Delimited
-</a></li></ul></li><li><a href="#g:5">Examples
-</a><ul><li><a href="#g:6">Simple answer-type modification
-</a></li><li><a href="#g:7">First-class <code>printf</code>
-</a></li><li><a href="#g:8">Walking binary trees
-</a></li></ul></li><li><a href="#g:9">Other notes
-</a><ul><li><a href="#g:10">Indexed monads
-</a></li><li><a href="#g:11">Using <code>do</code>-notation
-</a></li><li><a href="#g:12">Rank-2 typing
-</a></li></ul></li><li><a href="#g:13">Further reading
-</a></li><li><a href="#g:14">References
+</a><ul><li><a href="#g:3">Delimited
+</a></li></ul></li><li><a href="#g:4">Examples
+</a><ul><li><a href="#g:5">Simple answer-type modification
+</a></li><li><a href="#g:6">First-class <code>printf</code>
+</a></li><li><a href="#g:7">Walking binary trees
+</a></li></ul></li><li><a href="#g:8">Other notes
+</a><ul><li><a href="#g:9">Indexed monads
+</a></li><li><a href="#g:10">Using <code>do</code>-notation
+</a></li><li><a href="#g:11">Rank-2 typing
+</a></li></ul></li><li><a href="#g:12">Further reading
+</a></li><li><a href="#g:13">References
 </a></li></ul></div><div id="description"><p class="caption">Description</p><div class="doc"><p>This module provides an introductory tutorial in the
  &quot;Introduction&quot; section and beyond, followed by examples, and by
  some discussion behind the theory of the library with references.
@@ -47,23 +46,95 @@ in Haskell and OCaml) from Asai/Kiselyov is available [3]. A more
 traditional delimited continuation monad is available in the
 <code>CC-delcont</code> package [4]. The <code>CC-delcont</code> tutorial [5] serves
 as a basis for this tutorial (thanks to Dan Doel!)
-</p></div><h2 id="g:3">Undelimited
-</h2><div class="doc"><p>Lorem ipsum...
-</p></div><h2 id="g:4">Delimited
+</p></div><h2 id="g:3">Delimited
 </h2><div class="doc"><p>Let us consider the expression:
-</p></div><h1 id="g:5">Examples
+</p></div><h1 id="g:4">Examples
 </h1><div class="doc"><p>In the subsequent sections, we'll cover some examples of using this
 library in a few simple forms, which should form a basis for reasoning
 about how to use it. The same ideas should apply to other delimited
 continuation libraries or interfaces (i.e. scheme, ocaml, ochacaml,
 etc.)
-</p></div><h2 id="g:6">Simple answer-type modification
-</h2><div class="doc"><p>Lorem ipsum...
-</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>runDelim $ reset $ shift1 (\_ -&gt; return &quot;hello&quot;) &gt;&gt;= \r -&gt; return (r + 1)
+</p></div><h2 id="g:5">Simple answer-type modification
+</h2><div class="doc"><p>Basic answer type modification is very simple to demonstrate.
+Consider that we <code>shift</code> some computation and discard the continuation
+<code>k</code>. Then the answer type of the enclosing <code><code><a href="Control-Delimited.html#v:reset">reset</a></code></code> changes to the
+return type of the <code>shift</code>ed block. For example:
+</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>runDelim $ reset $ shift2 (\_ -&gt; ret &quot;hello&quot;) !&gt;&gt;= \r -&gt; ret (r + 1)
 </code></strong>&quot;hello&quot;
-</pre></div><h2 id="g:7">First-class <code>printf</code>
-</h2><div class="doc"><p>Lorem ipsum...
-</p></div><h2 id="g:8">Walking binary trees
+</pre><p>Here, the initial answer type of the enclosing <code><code><a href="Control-Delimited.html#v:reset">reset</a></code></code> is initially
+<code>Int</code>, because the return of the reset is <code>Int</code>. However, we use
+<code><code><a href="Control-Delimited.html#v:shift2">shift2</a></code></code>, which changes the answer type by <em>discarding</em> the
+delimited continuation, and simply returning a <code><code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code></code>.
+</p><p>On the other hand, it is also clear when the answer type is
+polymorphic and cannot be changed. Instead consider this example:
+</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>:t runDelim $ reset $ shift2 (\k -&gt; ret k) !&gt;&gt;= \r -&gt; ret (r + (1::Int))
+</code></strong>runDelim $ reset $ shift2 (\k -&gt; ret k) !&gt;&gt;= \r -&gt; ret (r + (1::Int))
+  :: Int -&gt; Delim a' a' Int
+</pre><p>Here, the answer type is <em>not</em> changed by the call to <code><code><a href="Control-Delimited.html#v:shift2">shift2</a></code></code>: the
+continuation k is not discarded, but returned. This 'carries' the
+answer type variables with the value, enforcing the input and output
+answer types are the same. And so if we were to invoke <code>k</code>, then the
+answer type of the <code><code><a href="Control-Delimited.html#v:reset">reset</a></code></code> may still only be <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Int.html#t:Int">Int</a></code>: that is the only
+type of value we may place in the hole left by <code><code><a href="Control-Delimited.html#v:shift2">shift2</a></code></code>.
+</p></div><h2 id="g:6">First-class <code>printf</code>
+</h2><div class="doc"><p>We will now write a simple, typesafe <code>printf</code> function using
+delimited continuations. The key observation is that when we write a
+term like:
+</p><pre>
+printf &quot;foo %s bar %d&quot; x y
+</pre><p>we are actually filling in <em>holes</em> in place of the <code>%s</code> and <code>%d</code>
+specifiers. Instead, we can write a type safe formatter that 'fills
+in' the holes correctly by construction.
+</p><p>Let us first define formatting functions that will properly convert
+arguments to a <code><code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code></code>. The trivial one for a <code><code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code></code> itself is
+obvious:
+</p><pre>
+str :: String -&gt; String
+str = id
+</pre><p>We may also write one for <code><code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Int.html#t:Int">Int</a></code></code>s:
+</p><pre>
+int :: Int -&gt; String
+int = show
+</pre><p>We observe that a call to <code>printf</code> is similar to delimiting the
+computation of the format string argument. So we define <code>printf</code> as:
+</p><pre>
+printf p = <code><a href="Control-Delimited.html#v:reset">reset</a></code> p
+</pre><p>Now we will define a type-safe formatter, that will 'plug' the
+value into our string properly:
+</p><pre>
+fmt to = <code><a href="Control-Delimited.html#v:shift2">shift2</a></code> (\k -&gt; return (k . to))
+</pre><p>When we call <code>fmt</code>, we will <em>abort</em> back to the enclosing <code><code><a href="Control-Delimited.html#v:reset">reset</a></code></code>,
+returning a function. The function is <code>k . to</code>, which will convert our
+value to a <code><code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code></code> and plug it into the enclosing hole that <code>fmt</code>
+left behind. Now we will define some operators for chaining these
+function returns, and concatenating the string results:
+</p><pre>
+f $$ x = f <code><a href="Control-Indexed-Monad.html#v:-33--62--62--61-">!&gt;&gt;=</a></code> ($ x)
+infixl 1 $$
+
+f ^$ g = <code><a href="Control-Indexed-Monad.html#v:liftIxM2">liftIxM2</a></code> (++) f g
+
+run = <code><a href="Control-Delimited.html#v:runDelim">runDelim</a></code>
+</pre><p>Now, we can write:
+</p><pre>
+test1 :: String
+test1 = run $ printf (<code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> &quot;hello world!&quot;)
+</pre><p>And more interestingly:
+</p><pre>
+test2 :: String
+test2 = run $ sprintf (fmt int) $$ 1
+</pre><p>We may also format multiple arguments in a type safe manner, by
+concatenating the formatters with <code>^$</code> and passing arguments via <code>$$</code>:
+</p><pre>
+test3, test4 :: String
+
+test3 = run $ sprintf (<code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> &quot;goodbye &quot; ^$ fmt str ^$ <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> &quot;!&quot;) $$ &quot;world&quot;
+
+test4 = run $ sprintf (fmt str ^$ ret &quot; = &quot; ^$ fmt int) $$ &quot;x&quot; $$ 3
+</pre><p>It is an error to pass a value of an incorrect type to the
+corresponding formatter.
+</p><p>The full code is available in <code>examples/Printf.hs</code>.
+</p></div><h2 id="g:7">Walking binary trees
 </h2><div class="doc"><p>Here, we will...
 </p><pre>
 [-# LANGUAGE RankNTypes #-]
@@ -106,11 +177,11 @@ walk1 t = go (walk_tree t)
     go Done         = return ()
     go (Resume x k) = print x &gt;&gt; go (<code><a href="Control-Delimited.html#v:runDelim">runDelim</a></code> k)
 </pre><p>The full code is available in <code>examples/Tree.hs</code>.
-</p></div><h1 id="g:9">Other notes
+</p></div><h1 id="g:8">Other notes
 </h1><div class="doc"><p>Here we discuss some of the design aspects of the library,
 particularly for those wondering why we need indexed (or
 <em>indexed</em>) monads, and how we can reconcile this with <code>do</code>-notation.
-</p></div><h2 id="g:10">Indexed monads
+</p></div><h2 id="g:9">Indexed monads
 </h2><div class="doc"><p>While reading this tutorial, you may wonder why we use special
 operators (like <code><a href="Control-Indexed-Monad.html#v:-33--62--62--61-">!&gt;&gt;=</a></code> that mimmick <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Prelude.html#t:-62--62--61-">&gt;&gt;=</a></code>) for delimited
 computations, instead of regular operators from the <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code>
@@ -156,7 +227,7 @@ g</code>.
 </p><p>This polymorphism in the definition of <code><a href="Control-Indexed-Monad.html#t:-33--62--62--61-">!&gt;&gt;=</a></code> is
 what gives us answer type polymorphism: it means delimited
 computations may change the output answer type.
-</p></div><h2 id="g:11">Using <code>do</code>-notation
+</p></div><h2 id="g:10">Using <code>do</code>-notation
 </h2><div class="doc"><p>It's possible to use GHC's <code>RebindableSyntax</code> extension to re-define
 <code>do</code> notation to use the <code><a href="Control-Indexed-Monad.html#t:IxMonad">IxMonad</a></code> type class.
 </p><p>Begin your module by hiding the regular <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> methods, and then
@@ -188,7 +259,7 @@ test1 = <code><a href="Control-Delimited.html#v:runDelim">runDelim</a></code> $ 
 --   reset (fun () -&gt; 1 + shift (fun _ -&gt; &quot;hello&quot;)) ;;
 </pre><p>See <code>examples/Simple.hs</code> (included in the distribution) for several
 more examples.
-</p></div><h2 id="g:12">Rank-2 typing
+</p></div><h2 id="g:11">Rank-2 typing
 </h2><div class="doc"><p>This package requires GHC's <code>RankNTypes</code> extension, as it uses a
 rank-2 type for the definition of the <code>shift</code> operators <code><a href="Control-Delimited.html#v:shift2">shift2</a></code> and
 <code><a href="Control-Delimited.html#v:shift3">shift3</a></code>. The original implementation by Kiselyov is Haskell98 (he
@@ -201,9 +272,9 @@ clearer.
 </p><p>For a lot of cases, you will need to use <code>RankNTypes</code> if you want to
 abstract over the answer type variables properly (for example, in a
 recursive data structure.)
-</p></div><h1 id="g:13">Further reading
+</p></div><h1 id="g:12">Further reading
 </h1><div class="doc"><p>Lorem ipsum...
-</p></div><h1 id="g:14">References
+</p></div><h1 id="g:13">References
 </h1><div class="doc"><ol><li> <em>Genuine shift\reset in Haskell98</em>, by Kiselyov, on <em>haskell-cafe</em>:
      <a href="http://okmij.org/ftp/continuations/implementations.html#genuine-shift">http://okmij.org/ftp/continuations/implementations.html#genuine-shift</a>
 </li><li> <em>Polymorphic Delimited Continuations</em>, by Asai, Kameyama in <em>APLAS '07</em>:
