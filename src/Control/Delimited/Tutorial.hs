@@ -148,7 +148,92 @@ type of value we may place in the hole left by @'shift2'@.
 
 {- $example-printf
 
-Lorem ipsum...
+We will now write a simple, typesafe @printf@ function using
+delimited continuations. The key observation is that when we write a
+term like:
+
+@
+printf \"foo %s bar %d\" x y
+@
+
+we are actually filling in /holes/ in place of the @%s@ and @%d@
+specifiers. Instead, we can write a type safe formatter that 'fills
+in' the holes correctly by construction.
+
+Let us first define formatting functions that will properly convert
+arguments to a @'String'@. The trivial one for a @'String'@ itself is
+obvious:
+
+@
+str :: String -> String
+str = id
+@
+
+We may also write one for @'Int'@s:
+
+@
+int :: Int -> String
+int = show
+@
+
+We observe that a call to @printf@ is similar to delimiting the
+computation of the format string argument. So we define @printf@ as:
+
+@
+printf p = 'reset' p
+@
+
+Now we will define a type-safe formatter, that will \'plug\' the
+value into our string properly:
+
+@
+fmt to = 'shift2' (\\k -> return (k . to))
+@
+
+When we call @fmt@, we will /abort/ back to the enclosing @'reset'@,
+returning a function. The function is @k . to@, which will convert our
+value to a @'String'@ and plug it into the enclosing hole that @fmt@
+left behind. Now we will define some operators for chaining these
+function returns, and concatenating the string results:
+
+@
+f $$ x = f '!>>=' ($ x)
+infixl 1 $$
+
+f ^$ g = 'liftIxM2' (++) f g
+
+run = 'runDelim'
+@
+
+Now, we can write:
+
+@
+test1 :: String
+test1 = run $ printf ('ret' \"hello world!\")
+@
+
+And more interestingly:
+
+@
+test2 :: String
+test2 = run $ sprintf (fmt int) $$ 1
+@
+
+We may also format multiple arguments in a type safe manner, by
+concatenating the formatters with @^$@ and passing arguments via @$$@:
+
+@
+test3, test4 :: String
+
+test3 = run $ sprintf ('ret' \"goodbye \" ^$ fmt str ^$ 'ret' \"!\") $$ \"world\"
+
+test4 = run $ sprintf (fmt str ^$ ret \" = \" ^$ fmt int) $$ \"x\" $$ 3
+@
+
+It is an error to pass a value of an incorrect type to the
+corresponding formatter.
+
+The full code is available in @examples/Printf.hs@.
 
 -}
 
