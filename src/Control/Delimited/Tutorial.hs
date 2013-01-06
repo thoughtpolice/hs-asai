@@ -188,7 +188,7 @@ Now we will define a type-safe formatter, that will \'plug\' the
 value into our string properly:
 
 @
-fmt to = 'shift2' (\\k -> return (k . to))
+fmt to = 'shift2' (\\k -> 'ret' (k . to))
 @
 
 When we call @fmt@, we will /abort/ back to the enclosing @'reset'@,
