@@ -15,8 +15,9 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Delimited-Tuto
 </a></li></ul></li><li><a href="#g:12">Further reading
 </a></li><li><a href="#g:13">References
 </a></li></ul></div><div id="description"><p class="caption">Description</p><div class="doc"><p>This module provides an introductory tutorial in the
- &quot;Introduction&quot; section and beyond, followed by examples, and by
- some discussion behind the theory of the library with references.
+ &quot;Introduction&quot; section and beyond, followed by examples. Finally,
+ there's some discussion behind the theory and design of the
+ library, with references.
 </p></div></div><div id="synopsis"><p id="control.syn" class="caption expander" onclick="toggleSection('syn')">Synopsis</p><ul id="section.syn" class="hide" onclick="toggleSection('syn')"></ul></div><div id="interface"><h1 id="g:1">Introduction
 </h1><div class="doc"><p><code>asai</code> is a minimal library for <em>delimited continuations</em>, a 'slice'
 of a continuation that can be invoked as a function and composed.
@@ -130,7 +131,7 @@ test3, test4 :: String
 
 test3 = run $ sprintf (<code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> &quot;goodbye &quot; ^$ fmt str ^$ <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> &quot;!&quot;) $$ &quot;world&quot;
 
-test4 = run $ sprintf (fmt str ^$ ret &quot; = &quot; ^$ fmt int) $$ &quot;x&quot; $$ 3
+test4 = run $ sprintf (fmt str ^$ <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> &quot; = &quot; ^$ fmt int) $$ &quot;x&quot; $$ 3
 </pre><p>It is an error to pass a value of an incorrect type to the
 corresponding formatter.
 </p><p>The full code is available in <code>examples/Printf.hs</code>.
@@ -165,8 +166,8 @@ walk_tree x = <code><a href="Control-Delimited.html#v:runDelim">runDelim</a></co
 
 walk_tree' Leaf = <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> ()
 walk_tree' (Node l r x) =
-  walk_tree' l !&gt;&gt;
-  yield x      !&gt;&gt;
+  walk_tree' l <code><a href="Control-Indexed-Monad.html#v:-33--62--62-">!&gt;&gt;</a></code>
+  yield x      <code><a href="Control-Indexed-Monad.html#v:-33--62--62-">!&gt;&gt;</a></code>
   walk_tree' r
   where
     yield n = <code><a href="Control-Delimited.html#v:shift2">shift2</a></code> (\k -&gt; <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> $ Resume n $ k ())
