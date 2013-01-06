@@ -50,10 +50,8 @@ as a basis for this tutorial (thanks to Dan Doel!)
 </p></div><h2 id="g:3">Undelimited
 </h2><div class="doc"><p>Lorem ipsum...
 </p></div><h2 id="g:4">Delimited
-</h2><div class="doc"><p>Lorem ipsum...
-</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>runDelim $ reset $ shift1 (\_ -&gt; ret &quot;hello&quot;) !&gt;&gt;= \r -&gt; ret (r + 1)
-</code></strong>&quot;hello&quot;
-</pre></div><h1 id="g:5">Examples
+</h2><div class="doc"><p>Let us consider the expression:
+</p></div><h1 id="g:5">Examples
 </h1><div class="doc"><p>In the subsequent sections, we'll cover some examples of using this
 library in a few simple forms, which should form a basis for reasoning
 about how to use it. The same ideas should apply to other delimited
@@ -67,47 +65,46 @@ etc.)
 </h2><div class="doc"><p>Lorem ipsum...
 </p></div><h2 id="g:8">Walking binary trees
 </h2><div class="doc"><p>Here, we will...
-</p><pre> 
- -- Walking trees with coroutines.
- -- Based on:
- --    &lt;http://okmij.org/ftp/continuations/ContExample.hs&gt;
- module Tree where
+</p><pre>
+[-# LANGUAGE RankNTypes #-]
+module Tree where
 
- import Control.Delimited
+import Control.Delimited
 
- -- Binary trees
- data Tree a
-   = Leaf
-   | Node (Tree a) (Tree a) a
-   deriving (Show, Eq)
+-- Binary trees
+data Tree a
+  = Leaf
+  | Node (Tree a) (Tree a) a
+  deriving (Show, Eq)
 
- make_tree :: Int -&gt; Tree Int
- make_tree j = go j 1
-   where go 0 _ = Leaf
-         go i x = Node (go (i-1) $ 2*x) (go (i-1) $ 2*x+1) x
+make_tree :: Int -&gt; Tree Int
+make_tree j = go j 1
+  where go 0 _ = Leaf
+        go i x = Node (go (i-1) $ 2*x) (go (i-1) $ 2*x+1) x
 
- tree1 = make_tree 3
- tree2 = make_tree 4
+tree1 = make_tree 3
+tree2 = make_tree 4
 
- -- Coroutines as lazy monadic lists.
- data Coro a
-   = Done
-   | Resume a (forall s. Delim s s (Coro a))
+-- Coroutines as monadic lists.
+data Coro a
+  = Done
+  | Resume a (forall s. <code><a href="Control-Delimited.html#t:Delim">Delim</a></code> s s (Coro a))
 
- walk_tree x = runDelim (walk_tree' x !&gt;&gt; ret Done)
+walk_tree x = <code><a href="Control-Delimited.html#v:runDelim">runDelim</a></code> (walk_tree' x <code><a href="Control-Indexed-Monad.html#v:-33--62--62-">!&gt;&gt;</a></code> <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> Done)
 
- walk_tree' Leaf = ret ()
- walk_tree' (Node l r x) =
-   walk_tree' l !&gt;&gt;
-   yield x      !&gt;&gt;
-   walk_tree' r
-   where
-     yield n = shift2 (\k -&gt; ret $ Resume n $ k ())
+walk_tree' Leaf = <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> ()
+walk_tree' (Node l r x) =
+  walk_tree' l !&gt;&gt;
+  yield x      !&gt;&gt;
+  walk_tree' r
+  where
+    yield n = <code><a href="Control-Delimited.html#v:shift2">shift2</a></code> (\k -&gt; <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> $ Resume n $ k ())
 
- walk1 t = go (walk_tree t)
-   where
-     go Done         = return ()
-     go (Resume x k) = print x &gt;&gt; go (runDelim k)
+walk1 :: Show a =&gt; Tree a -&gt; IO ()
+walk1 t = go (walk_tree t)
+  where
+    go Done         = return ()
+    go (Resume x k) = print x &gt;&gt; go (<code><a href="Control-Delimited.html#v:runDelim">runDelim</a></code> k)
 </pre><p>The full code is available in <code>examples/Tree.hs</code>.
 </p></div><h1 id="g:9">Other notes
 </h1><div class="doc"><p>Here we discuss some of the design aspects of the library,
@@ -122,27 +119,33 @@ type of delimited computation is polymorphic, we need the monad to
 'carry' the answer types around.
 </p><p>Consider the vanilla <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> typeclass. It is defined like this (with
 explicit kind signatures):
-</p><pre> class Monad (m :: * -&gt; *) where ...
+</p><pre>
+class <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> (m :: * -&gt; *) where ...
 </pre><p>The <code>m</code> type constructor abstracts over a single type variable. It is
 possible to make types with multiple type variables an instance of
 <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> of course, but their non-abstracted type variables must be
 fixed. As an example, considering the instance for <code><code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Either.html#t:Either">Either</a></code> e</code>:
-</p><pre> instance Monad (Either e) where ...
+</p><pre>
+instance <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> (<code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Either.html#t:Either">Either</a></code> e) where ...
 </pre><p>Note the type variable <code>e</code> is fixed over the definition of a term of
-type <code>Either e :: * -&gt; *</code>. If you have something like:
-</p><pre> thing :: a -&gt; Either String a
- thing a = do
-   ...
+type <code><code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Either.html#t:Either">Either</a></code> e :: * -&gt; *</code>. If you have something like:
+</p><pre>
+thing :: a -&gt; <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Either.html#t:Either">Either</a></code> String a
+thing a = do
+  ...
 </pre><p>Then in the body we may say:
-</p><pre> x &lt;- Left &quot;oh no!&quot;
+</p><pre>
+x &lt;- Left &quot;oh no!&quot;
 </pre><p>But we can never say:
-</p><pre> x &lt;- Left False
-</pre><p>because <code>e</code> is fixed to <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code>.
+</p><pre>
+x &lt;- Left False
+</pre><p>because <code>e</code> is fixed to <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code>. Another example is that the <code><a href="Control-Monad-State.html#t:State">State</a></code> monad always has a fixed
 </p><p>Indexed monads solve this problem by 'expanding' the kind of <code>m</code> in
 the <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> typeclass. The result is <code><a href="Control-Indexed-Monad.html#t:IxMonad">IxMonad</a></code>, which is defined as:
-</p><pre> class IxMonad (m :: * -&gt; * -&gt; * -&gt; *) where
-   ret    :: t -&gt; m a a t
-   (!&gt;&gt;=) :: m b g s -&gt; (s -&gt; m a b t) -&gt; m a g t
+</p><pre>
+ class <code><a href="Control-Indexed-Monad.html#t:IxMonad">IxMonad</a></code> (m :: * -&gt; * -&gt; * -&gt; *) where
+   <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code>    :: t -&gt; m a a t
+   (<code><a href="Control-Indexed-Monad.html#v:-33--62--62--61-">!&gt;&gt;=</a></code>) :: m b g s -&gt; (s -&gt; m a b t) -&gt; m a g t
 </pre><p>Note the new type variables: these represent the input and output
 answer types of a delimited computation. We can see that <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> is
 fully polymorphic in its answer type: a statement of <code>ret foo</code> in a
@@ -161,29 +164,28 @@ redefine <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Pre
 other operators too. Here's an example (you'll need to fix the
 <code>LANGUAGE</code> pragma yourself on the first line, since Haddock eats it
 otherwise):
-</p><pre> [-# LANGUAGE RebindableSyntax, NoImplicitPrelude #-]
- module Foo where
+</p><pre>
+[-# LANGUAGE RebindableSyntax #-]
+module Foo where
 
- import Control.Indexed.Prelude
- import Control.Delimited
+import Control.Indexed.Prelude
+import Control.Delimited
 
- -- Now use 'do' notation instead of the indexed bind/return
- -- functions.
+-- After importing the indexed prelude, we can use do notation
 
- -- You can lift regular monads into indexed monads using
- -- 'lift' and 'runI'
- io1 :: IO ()
- io1 = runI $ do
-   lift $ putStrLn &quot;hi!&quot;
-   lift $ putStrLn &quot;hi!&quot;
-   return ()
+-- Lifting ordinary monads
+io1 :: IO ()
+io1 = <code><a href="Control-Indexed-Monad.html#v:runI">runI</a></code> $ do
+  <code><a href="Control-Indexed-Monad.html#v:lift">lift</a></code> $ putStrLn &quot;hi!&quot;
+  <code><a href="Control-Indexed-Monad.html#v:lift">lift</a></code> $ putStrLn &quot;hi!&quot;
+  return ()
 
- test1 :: String
- test1 = runDelim $ reset $ do
-   r &lt;- shift1 (\_ -&gt; return &quot;hello&quot;)
-   return (r + 1)
- -- This is equivalent to the OchaCaml term:
- --   reset (fun () -&gt; 1 + shift (fun _ -&gt; &quot;hello&quot;)) ;;
+test1 :: String
+test1 = <code><a href="Control-Delimited.html#v:runDelim">runDelim</a></code> $ <code><a href="Control-Delimited.html#v:reset">reset</a></code> $ do
+  r &lt;- <code><a href="Control-Delimited.html#v:shift1">shift1</a></code> (const $ return &quot;hello&quot;)
+  return (r + 1)
+-- This is equivalent to the OchaCaml term:
+--   reset (fun () -&gt; 1 + shift (fun _ -&gt; &quot;hello&quot;)) ;;
 </pre><p>See <code>examples/Simple.hs</code> (included in the distribution) for several
 more examples.
 </p></div><h2 id="g:12">Rank-2 typing
