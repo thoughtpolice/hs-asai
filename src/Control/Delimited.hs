@@ -57,7 +57,7 @@ import Control.Indexed.Monad
 -- Consider a term like:
 --
 -- @
--- reset $ [...] !>>= \\r -> ret $ r ++ \" world\"
+-- 'reset' $ [...] '!>>=' \\r -> 'ret' $ r ++ \" world\"
 -- @
 --
 -- Here, the answer type of the enclosing 'reset' is 'String'. If the
