@@ -71,9 +71,13 @@ import Control.Indexed.Monad
 -- modify the answer type, since we can only invoke @k@ to return an
 -- 'Int'):
 --
--- >>> :t runDelim $ reset $ shift2 (\k -> ret k) !>>= \r -> ret (r + (1::Int))
--- runDelim $ reset $ shift2 (\k -> ret k) !>>= \r -> ret (r + (1::Int))
---   :: Int -> Delim a' a' Int
+-- >>> :t runDelim (reset $ shift2 (\k -> ret k) !>>= ret . (+1))
+-- runDelim (reset $ shift2 (\k -> ret k) !>>= ret . (+1))
+--   :: Num t => t -> Delim a' a' t
+--
+-- >>> let f = runDelim (reset $ shift2 (\k -> ret k) !>>= ret . (+1))
+-- >>> runDelim (f 5)
+-- 6
 --
 -- Note how the quantified variable @a'@ is both the input and output
 -- answer type of @k@: thus, it cannot change the answer type (here we use
@@ -130,10 +134,16 @@ family and \'zipper\' of @shift@ operators.)
 -- bound as a parameter.
 --
 -- This is the most pure definition of @shift@: both the continuation
--- @k@ and the enclosed body are pure.
+-- @k@ and the enclosed body are pure, and may be composed with
+-- @'Prelude..'@.
 --
 -- This is defined in terms of @'Delim'@.
 --
+-- >>> runDelim $ reset $ shift0 (const "hello") !>>= ret . (+1)
+-- "hello"
+--
+-- >>> runDelim $ reset $ shift0 (\k -> (k . k) 3) !>>= ret . (+1)
+-- 5
 shift0 :: ((b -> s) -> t) -> Delim s t b
 shift0 f = Delim f
 
@@ -148,6 +158,11 @@ shift0 f = Delim f
 --
 -- This is defined in terms of @'shift0'@.
 --
+-- >>> runDelim $ reset $ shift1 (const $ ret "hello") !>>= ret . (+1)
+-- "hello"
+--
+-- >>> runDelim $ reset $ shift1 (\k -> ret $ (k . k) 3) !>>= ret . (+1)
+-- 5
 shift1 :: ((b -> s) -> Delim a t a) -> Delim s t b
 shift1 f = shift0 (\k -> unDelim (f k) id)
 
@@ -161,6 +176,11 @@ shift1 f = shift0 (\k -> unDelim (f k) id)
 --
 -- This is defined in terms of @'shift1'@.
 --
+-- >>> runDelim $ reset $ shift2 (const $ ret "hello") !>>= ret . (+1)
+-- "hello"
+--
+-- >>> runDelim $ reset $ shift2 (\k -> (k !>=> k) 3) !>>= ret . (+1)
+-- 5
 shift2 :: ((b -> forall a'. Delim a' a' s) -> Delim a t a) -> Delim s t b
 shift2 f = shift1 (\k -> f (ret . k))
 
@@ -178,6 +198,11 @@ shift2 f = shift1 (\k -> f (ret . k))
 --
 -- This is defined in terms of @'shift2'@.
 --
+-- >>> runDelim $ reset $ shift3 (const $ ret "hello") !>>= ret . (+1)
+-- "hello"
+--
+-- >>> runDelim $ reset $ shift3 (\k -> k $ ret 3) !>>= ret . (+1)
+-- 4
 shift3 :: ((forall a'. Delim a' a' b -> Delim a' a' s) -> Delim a t a) -> Delim s t b
 shift3 f = shift2 (\k -> f (!>>= k))
 
@@ -202,8 +227,12 @@ shift0' f = shift1' (ret . f)
 callCC :: ((b -> Delim u s a) -> Delim s t b) -> Delim s t b
 callCC f = shift0 (\k -> unDelim (f (\a -> shift0 $ \_ -> k a)) k)
 
--- | Run a delimited computation. If no @'reset'@ occurs in the body
--- of @'runDelim'@, then if a @'shift'@ delimits the computation body
--- up to @'runDelim'@.
+-- | Run a delimited computation.
+--
+-- >>> runDelim (reset $ ret "hello")
+-- "hello"
+--
+-- >>> runDelim (ret 5)
+-- 5
 runDelim :: Delim t t t -> t
 runDelim (Delim f) = f id
