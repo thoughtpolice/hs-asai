@@ -103,7 +103,7 @@ printf p = <code><a href="Control-Delimited.html#v:reset">reset</a></code> p
 </pre><p>Now we will define a type-safe formatter, that will 'plug' the
 value into our string properly:
 </p><pre>
-fmt to = <code><a href="Control-Delimited.html#v:shift2">shift2</a></code> (\k -&gt; return (k . to))
+fmt to = <code><a href="Control-Delimited.html#v:shift2">shift2</a></code> (\k -&gt; <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> (k . to))
 </pre><p>When we call <code>fmt</code>, we will <em>abort</em> back to the enclosing <code><code><a href="Control-Delimited.html#v:reset">reset</a></code></code>,
 returning a function. The function is <code>k . to</code>, which will convert our
 value to a <code><code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code></code> and plug it into the enclosing hole that <code>fmt</code>
