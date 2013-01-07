@@ -180,7 +180,7 @@ shift0' f = shift1' (ret . f)
 
 -- | Traditional @call/cc@ operator.
 --
--- This is defined in terms of 'shift0'.
+-- This is defined in terms of 'shift0' and 'Delim' internally.
 callCC :: ((b -> Delim u s a) -> Delim s t b) -> Delim s t b
 callCC f = shift0 (\k -> unDelim (f (\a -> shift0 $ \_ -> k a)) k)
 
