@@ -89,6 +89,12 @@ instance IxMonad Delim where
 
 -- | Delimit a computation. The type variable @a@ indicates that
 -- 'reset' is polymorphic in its answer type.
+--
+-- >>> runDelim (reset $ ret "hello")
+-- "hello"
+--
+-- >>> runDelim (ret 5)
+-- 5
 reset :: Delim s t s -> Delim a a t
 reset (Delim f) = Delim (\k -> k (f id))
 
@@ -125,6 +131,9 @@ family and \'zipper\' of @shift@ operators.)
 --
 -- This is the most pure definition of @shift@: both the continuation
 -- @k@ and the enclosed body are pure.
+--
+-- This is defined in terms of @'Delim'@.
+--
 shift0 :: ((b -> s) -> t) -> Delim s t b
 shift0 f = Delim f
 
@@ -134,8 +143,11 @@ shift0 f = Delim f
 -- This definition of @shift@ prohibits the continuation @k@ from
 -- being monadic, while allowing the body to be monadic (this means
 -- @k@ is trivially polymorphic in its answer type, while remaining
--- Haskell98.) For this reason it is less pure than 'shift0' but more
--- pure than 'shift2'.
+-- Haskell98.) For this reason it is less pure than @'shift0'@ but more
+-- pure than @'shift2'@.
+--
+-- This is defined in terms of @'shift0'@.
+--
 shift1 :: ((b -> s) -> Delim a t a) -> Delim s t b
 shift1 f = shift0 (\k -> unDelim (f k) id)
 
@@ -146,6 +158,9 @@ shift1 f = shift0 (\k -> unDelim (f k) id)
 -- encapsulates the typing rules of Asai's lambda/shift calculus using
 -- rank-2 polymorphism: the continuation's answer type is fully
 -- polymorphic.
+--
+-- This is defined in terms of @'shift1'@.
+--
 shift2 :: ((b -> forall a'. Delim a' a' s) -> Delim a t a) -> Delim s t b
 shift2 f = shift1 (\k -> f (ret . k))
 
@@ -158,8 +173,11 @@ shift2 f = shift1 (\k -> f (ret . k))
 -- Framework for Delimited Continuations\", available in the
 -- @CC-delcont@ package.
 --
--- Like 'shift2', this uses rank-2 polymorphism to ensure that the
+-- Like @'shift2'@, this uses rank-2 polymorphism to ensure that the
 -- continuation @k@ is polymorphic in its answer type.
+--
+-- This is defined in terms of @'shift2'@.
+--
 shift3 :: ((forall a'. Delim a' a' b -> Delim a' a' s) -> Delim a t a) -> Delim s t b
 shift3 f = shift2 (\k -> f (!>>= k))
 
@@ -180,10 +198,12 @@ shift0' f = shift1' (ret . f)
 
 -- | Traditional @call/cc@ operator.
 --
--- This is defined in terms of 'shift0' and 'Delim' internally.
+-- This is defined in terms of @'shift0'@ and @'Delim'@ internally.
 callCC :: ((b -> Delim u s a) -> Delim s t b) -> Delim s t b
 callCC f = shift0 (\k -> unDelim (f (\a -> shift0 $ \_ -> k a)) k)
 
--- | Run a delimited computation.
+-- | Run a delimited computation. If no @'reset'@ occurs in the body
+-- of @'runDelim'@, then if a @'shift'@ delimits the computation body
+-- up to @'runDelim'@.
 runDelim :: Delim t t t -> t
 runDelim (Delim f) = f id
