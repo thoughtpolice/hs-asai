@@ -342,7 +342,9 @@ But we can never say:
 x <- Left False
 @
 
-because @e@ is fixed to 'String'. Another example is that the 'Control.Monad.State.State' monad always has a fixed
+because @e@ is fixed to 'String'. Another example is that the
+'Control.Monad.State.State' monad always has a fixed state type, and
+it may never change over the course of the computation.
 
 Indexed monads solve this problem by \'expanding\' the kind of @m@ in
 the 'Monad' typeclass. The result is 'IxMonad', which is defined as:
