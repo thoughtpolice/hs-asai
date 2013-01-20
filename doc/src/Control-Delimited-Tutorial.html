@@ -11,7 +11,7 @@
 <a name="line-2"></a><span class='hs-comment'>{-# LANGUAGE RebindableSyntax, NoImplicitPrelude #-}</span>
 <a name="line-3"></a><span class='hs-comment'>-- |</span>
 <a name="line-4"></a><span class='hs-comment'>-- Module      : Control.Delimited.Tutorial</span>
-<a name="line-5"></a><span class='hs-comment'>-- Copyright   : (c) Oleg Kiselyov 2007-2012, (c) Austin Seipp 2012</span>
+<a name="line-5"></a><span class='hs-comment'>-- Copyright   : (c) Oleg Kiselyov 2007-2013, (c) Austin Seipp 2012-2013</span>
 <a name="line-6"></a><span class='hs-comment'>-- License     : MIT</span>
 <a name="line-7"></a><span class='hs-comment'>--</span>
 <a name="line-8"></a><span class='hs-comment'>-- Maintainer  : mad.one@gmail.com</span>
@@ -132,7 +132,7 @@
 <a name="line-123"></a>@k@. Then the answer type of the enclosing @'reset'@ changes to the
 <a name="line-124"></a>return type of the @shift@ed block. For example:
 <a name="line-125"></a>
-<a name="line-126"></a>&gt;&gt;&gt; runDelim $ reset $ shift2 (\_ -&gt; ret "hello") !&gt;&gt;= \r -&gt; ret (r + 1)
+<a name="line-126"></a>&gt;&gt;&gt; runDelim $ reset $ shift2 (\_ -&gt; returnI "hello") !&gt;&gt;= \r -&gt; returnI (r + 1)
 <a name="line-127"></a>"hello"
 <a name="line-128"></a>
 <a name="line-129"></a>Here, the initial answer type of the enclosing @'reset'@ is initially
@@ -143,8 +143,8 @@
 <a name="line-134"></a>On the other hand, it is also clear when the answer type is
 <a name="line-135"></a>polymorphic and cannot be changed. Instead consider this example:
 <a name="line-136"></a>
-<a name="line-137"></a>&gt;&gt;&gt; :t runDelim $ reset $ shift2 (\k -&gt; ret k) !&gt;&gt;= \r -&gt; ret (r + (1::Int))
-<a name="line-138"></a>runDelim $ reset $ shift2 (\k -&gt; ret k) !&gt;&gt;= \r -&gt; ret (r + (1::Int))
+<a name="line-137"></a>&gt;&gt;&gt; :t runDelim $ reset $ shift2 (\k -&gt; returnI k) !&gt;&gt;= \r -&gt; returnI (r + (1::Int))
+<a name="line-138"></a>runDelim $ reset $ shift2 (\k -&gt; returnI k) !&gt;&gt;= \r -&gt; returnI (r + (1::Int))
 <a name="line-139"></a>  :: Int -&gt; Delim a' a' Int
 <a name="line-140"></a>
 <a name="line-141"></a>Here, the answer type is /not/ changed by the call to @'shift2'@: the
@@ -197,7 +197,7 @@
 <a name="line-188"></a>value into our string properly:
 <a name="line-189"></a>
 <a name="line-190"></a>@
-<a name="line-191"></a>fmt to = 'shift2' (\\k -&gt; 'ret' (k . to))
+<a name="line-191"></a>fmt to = 'shift2' (\\k -&gt; 'returnI' (k . to))
 <a name="line-192"></a>@
 <a name="line-193"></a>
 <a name="line-194"></a>When we call @fmt@, we will /abort/ back to the enclosing @'reset'@,
@@ -219,7 +219,7 @@
 <a name="line-210"></a>
 <a name="line-211"></a>@
 <a name="line-212"></a>test1 :: String
-<a name="line-213"></a>test1 = run $ printf ('ret' \"hello world!\")
+<a name="line-213"></a>test1 = run $ printf ('returnI' \"hello world!\")
 <a name="line-214"></a>@
 <a name="line-215"></a>
 <a name="line-216"></a>And more interestingly:
@@ -235,9 +235,9 @@
 <a name="line-226"></a>@
 <a name="line-227"></a>test3, test4 :: String
 <a name="line-228"></a>
-<a name="line-229"></a>test3 = run $ sprintf ('ret' \"goodbye \" ^$ fmt str ^$ 'ret' \"!\") $$ \"world\"
+<a name="line-229"></a>test3 = run $ sprintf ('returnI' \"goodbye \" ^$ fmt str ^$ 'returnI' \"!\") $$ \"world\"
 <a name="line-230"></a>
-<a name="line-231"></a>test4 = run $ sprintf (fmt str ^$ 'ret' \" = \" ^$ fmt int) $$ \"x\" $$ 3
+<a name="line-231"></a>test4 = run $ sprintf (fmt str ^$ 'returnI' \" = \" ^$ fmt int) $$ \"x\" $$ 3
 <a name="line-232"></a>@
 <a name="line-233"></a>
 <a name="line-234"></a>It is an error to pass a value of an incorrect type to the
@@ -276,15 +276,15 @@
 <a name="line-267"></a>  = Done
 <a name="line-268"></a>  | Resume a (forall s. 'Delim' s s (Coro a))
 <a name="line-269"></a>
-<a name="line-270"></a>walk_tree x = 'runDelim' (walk_tree' x '!&gt;&gt;' 'ret' Done)
+<a name="line-270"></a>walk_tree x = 'runDelim' (walk_tree' x '!&gt;&gt;' 'returnI' Done)
 <a name="line-271"></a>
-<a name="line-272"></a>walk_tree' Leaf = 'ret' ()
+<a name="line-272"></a>walk_tree' Leaf = 'returnI' ()
 <a name="line-273"></a>walk_tree' (Node l r x) =
 <a name="line-274"></a>  walk_tree' l '!&gt;&gt;'
 <a name="line-275"></a>  yield x      '!&gt;&gt;'
 <a name="line-276"></a>  walk_tree' r
 <a name="line-277"></a>  where
-<a name="line-278"></a>    yield n = 'shift2' (\\k -&gt; 'ret' $ Resume n $ k ())
+<a name="line-278"></a>    yield n = 'shift2' (\\k -&gt; 'returnI' $ Resume n $ k ())
 <a name="line-279"></a>
 <a name="line-280"></a>walk1 :: Show a =&gt; Tree a -&gt; IO ()
 <a name="line-281"></a>walk1 t = go (walk_tree t)
@@ -351,111 +351,113 @@
 <a name="line-342"></a>x &lt;- Left False
 <a name="line-343"></a>@
 <a name="line-344"></a>
-<a name="line-345"></a>because @e@ is fixed to 'String'. Another example is that the 'Control.Monad.State.State' monad always has a fixed
-<a name="line-346"></a>
-<a name="line-347"></a>Indexed monads solve this problem by \'expanding\' the kind of @m@ in
-<a name="line-348"></a>the 'Monad' typeclass. The result is 'IxMonad', which is defined as:
-<a name="line-349"></a>
-<a name="line-350"></a>@
-<a name="line-351"></a> class 'IxMonad' (m :: * -&gt; * -&gt; * -&gt; *) where
-<a name="line-352"></a>   'ret'    :: t -&gt; m a a t
-<a name="line-353"></a>   ('!&gt;&gt;=') :: m b g s -&gt; (s -&gt; m a b t) -&gt; m a g t
-<a name="line-354"></a>@
-<a name="line-355"></a>
-<a name="line-356"></a>Note the new type variables: these represent the input and output
-<a name="line-357"></a>answer types of a delimited computation. We can see that 'ret' is
-<a name="line-358"></a>fully polymorphic in its answer type: a statement of @ret foo@ in a
-<a name="line-359"></a>'Delim' simply does not change the answer type at all. Note the answer
-<a name="line-360"></a>types present in 'Control.Indexed.Monad.!&gt;&gt;=': we have an answer type
-<a name="line-361"></a>of @a b@ and @b g@, meaning we can get an overall answer type of @a
-<a name="line-362"></a>g@.
-<a name="line-363"></a>
-<a name="line-364"></a>This polymorphism in the definition of 'Control.Indexed.Monad.!&gt;&gt;=' is
-<a name="line-365"></a>what gives us answer type polymorphism: it means delimited
-<a name="line-366"></a>computations may change the output answer type.
-<a name="line-367"></a>
-<a name="line-368"></a>-}</span>
+<a name="line-345"></a>because @e@ is fixed to 'String'. Another example is that the
+<a name="line-346"></a>'Control.Monad.State.State' monad always has a fixed state type, and
+<a name="line-347"></a>it may never change over the course of the computation.
+<a name="line-348"></a>
+<a name="line-349"></a>Indexed monads solve this problem by \'expanding\' the kind of @m@ in
+<a name="line-350"></a>the 'Monad' typeclass. The result is 'IxMonad', which is defined as:
+<a name="line-351"></a>
+<a name="line-352"></a>@
+<a name="line-353"></a> class 'IxMonad' (m :: * -&gt; * -&gt; * -&gt; *) where
+<a name="line-354"></a>   'returnI' :: t -&gt; m a a t
+<a name="line-355"></a>   ('!&gt;&gt;=')  :: m b g s -&gt; (s -&gt; m a b t) -&gt; m a g t
+<a name="line-356"></a>@
+<a name="line-357"></a>
+<a name="line-358"></a>Note the new type variables: these represent the input and output
+<a name="line-359"></a>answer types of a delimited computation. We can see that 'returnI' is
+<a name="line-360"></a>fully polymorphic in its answer type: a statement of @returnI foo@ in a
+<a name="line-361"></a>'Delim' simply does not change the answer type at all. Note the answer
+<a name="line-362"></a>types present in 'Control.Indexed.Monad.!&gt;&gt;=': we have an answer type
+<a name="line-363"></a>of @a b@ and @b g@, meaning we can get an overall answer type of @a
+<a name="line-364"></a>g@.
+<a name="line-365"></a>
+<a name="line-366"></a>This polymorphism in the definition of 'Control.Indexed.Monad.!&gt;&gt;=' is
+<a name="line-367"></a>what gives us answer type polymorphism: it means delimited
+<a name="line-368"></a>computations may change the output answer type.
 <a name="line-369"></a>
-<a name="line-370"></a><span class='hs-comment'>{- $donotation
+<a name="line-370"></a>-}</span>
 <a name="line-371"></a>
-<a name="line-372"></a>It's possible to use GHC's @RebindableSyntax@ extension to re-define
-<a name="line-373"></a>@do@ notation to use the 'IxMonad' type class.
-<a name="line-374"></a>
-<a name="line-375"></a>Begin your module by hiding the regular 'Monad' methods, and then
-<a name="line-376"></a>redefine 'Prelude.&gt;&gt;=' and 'Prelude.return'. Feel free to redefine
-<a name="line-377"></a>other operators too. Here's an example (you'll need to fix the
-<a name="line-378"></a>@LANGUAGE@ pragma yourself on the first line, since Haddock eats it
-<a name="line-379"></a>otherwise):
-<a name="line-380"></a>
-<a name="line-381"></a>@
-<a name="line-382"></a>[-\# LANGUAGE RebindableSyntax \#-]
-<a name="line-383"></a>module Foo where
-<a name="line-384"></a>
-<a name="line-385"></a>import Control.Indexed.Prelude
-<a name="line-386"></a>import Control.Delimited
-<a name="line-387"></a>
-<a name="line-388"></a>\-- After importing the indexed prelude, we can use do notation
+<a name="line-372"></a><span class='hs-comment'>{- $donotation
+<a name="line-373"></a>
+<a name="line-374"></a>It's possible to use GHC's @RebindableSyntax@ extension to re-define
+<a name="line-375"></a>@do@ notation to use the 'IxMonad' type class.
+<a name="line-376"></a>
+<a name="line-377"></a>Begin your module by hiding the regular 'Monad' methods, and then
+<a name="line-378"></a>redefine 'Prelude.&gt;&gt;=' and 'Prelude.return'. Feel free to redefine
+<a name="line-379"></a>other operators too. Here's an example (you'll need to fix the
+<a name="line-380"></a>@LANGUAGE@ pragma yourself on the first line, since Haddock eats it
+<a name="line-381"></a>otherwise):
+<a name="line-382"></a>
+<a name="line-383"></a>@
+<a name="line-384"></a>[-\# LANGUAGE RebindableSyntax \#-]
+<a name="line-385"></a>module Foo where
+<a name="line-386"></a>
+<a name="line-387"></a>import Control.Indexed.Prelude
+<a name="line-388"></a>import Control.Delimited
 <a name="line-389"></a>
-<a name="line-390"></a>\-- Lifting ordinary monads
-<a name="line-391"></a>io1 :: IO ()
-<a name="line-392"></a>io1 = 'runI' $ do
-<a name="line-393"></a>  'lift' $ putStrLn \"hi!\"
-<a name="line-394"></a>  'lift' $ putStrLn \"hi!\"
-<a name="line-395"></a>  return ()
-<a name="line-396"></a>
-<a name="line-397"></a>test1 :: String
-<a name="line-398"></a>test1 = 'runDelim' $ 'reset' $ do
-<a name="line-399"></a>  r &lt;- 'shift1' (const $ return \"hello\")
-<a name="line-400"></a>  return (r + 1)
-<a name="line-401"></a>\-- This is equivalent to the OchaCaml term:
-<a name="line-402"></a>\--   reset (fun () -&gt; 1 + shift (fun _ -&gt; \"hello\")) ;;
-<a name="line-403"></a>@
-<a name="line-404"></a>
-<a name="line-405"></a>See @examples/Simple.hs@ (included in the distribution) for several
-<a name="line-406"></a>more examples.
-<a name="line-407"></a>
-<a name="line-408"></a>-}</span>
+<a name="line-390"></a>\-- After importing the indexed prelude, we can use do notation
+<a name="line-391"></a>
+<a name="line-392"></a>\-- Lifting ordinary monads
+<a name="line-393"></a>io1 :: IO ()
+<a name="line-394"></a>io1 = 'runI' $ do
+<a name="line-395"></a>  'lift' $ putStrLn \"hi!\"
+<a name="line-396"></a>  'lift' $ putStrLn \"hi!\"
+<a name="line-397"></a>  return ()
+<a name="line-398"></a>
+<a name="line-399"></a>test1 :: String
+<a name="line-400"></a>test1 = 'runDelim' $ 'reset' $ do
+<a name="line-401"></a>  r &lt;- 'shift1' (const $ return \"hello\")
+<a name="line-402"></a>  return (r + 1)
+<a name="line-403"></a>\-- This is equivalent to the OchaCaml term:
+<a name="line-404"></a>\--   reset (fun () -&gt; 1 + shift (fun _ -&gt; \"hello\")) ;;
+<a name="line-405"></a>@
+<a name="line-406"></a>
+<a name="line-407"></a>See @examples/Simple.hs@ (included in the distribution) for several
+<a name="line-408"></a>more examples.
 <a name="line-409"></a>
-<a name="line-410"></a><span class='hs-comment'>{- $rankntypes
+<a name="line-410"></a>-}</span>
 <a name="line-411"></a>
-<a name="line-412"></a>This package requires GHC's @RankNTypes@ extension, as it uses a
-<a name="line-413"></a>rank-2 type for the definition of the @shift@ operators 'shift2' and
-<a name="line-414"></a>'shift3'. The original implementation by Kiselyov is Haskell98 (he
-<a name="line-415"></a>defines @shift@ as the 'shift1' provided in this package, as opposed
-<a name="line-416"></a>to 'shift2' which matches the typing rules of the lambda/shift
-<a name="line-417"></a>calculus.)
-<a name="line-418"></a>
-<a name="line-419"></a>Strictly speaking, the rank-2 type is probably not necessary, but it
-<a name="line-420"></a>is not very controversial either, and it makes the intent much
-<a name="line-421"></a>clearer.
-<a name="line-422"></a>
-<a name="line-423"></a>For a lot of cases, you will need to use @RankNTypes@ if you want to
-<a name="line-424"></a>abstract over the answer type variables properly (for example, in a
-<a name="line-425"></a>recursive data structure.)
-<a name="line-426"></a>
-<a name="line-427"></a>-}</span>
+<a name="line-412"></a><span class='hs-comment'>{- $rankntypes
+<a name="line-413"></a>
+<a name="line-414"></a>This package requires GHC's @RankNTypes@ extension, as it uses a
+<a name="line-415"></a>rank-2 type for the definition of the @shift@ operators 'shift2' and
+<a name="line-416"></a>'shift3'. The original implementation by Kiselyov is Haskell98 (he
+<a name="line-417"></a>defines @shift@ as the 'shift1' provided in this package, as opposed
+<a name="line-418"></a>to 'shift2' which matches the typing rules of the lambda/shift
+<a name="line-419"></a>calculus.)
+<a name="line-420"></a>
+<a name="line-421"></a>Strictly speaking, the rank-2 type is probably not necessary, but it
+<a name="line-422"></a>is not very controversial either, and it makes the intent much
+<a name="line-423"></a>clearer.
+<a name="line-424"></a>
+<a name="line-425"></a>For a lot of cases, you will need to use @RankNTypes@ if you want to
+<a name="line-426"></a>abstract over the answer type variables properly (for example, in a
+<a name="line-427"></a>recursive data structure.)
 <a name="line-428"></a>
-<a name="line-429"></a><span class='hs-comment'>{- $morereading
+<a name="line-429"></a>-}</span>
 <a name="line-430"></a>
-<a name="line-431"></a>Lorem ipsum...
+<a name="line-431"></a><span class='hs-comment'>{- $morereading
 <a name="line-432"></a>
-<a name="line-433"></a>-}</span>
+<a name="line-433"></a>Lorem ipsum...
 <a name="line-434"></a>
-<a name="line-435"></a><span class='hs-comment'>{- $refs
+<a name="line-435"></a>-}</span>
 <a name="line-436"></a>
-<a name="line-437"></a>  1. /Genuine shift\reset in Haskell98/, by Kiselyov, on /haskell-cafe/:
-<a name="line-438"></a>     &lt;<a href="http://okmij.org/ftp/continuations/implementations.html#genuine-shift">http://okmij.org/ftp/continuations/implementations.html#genuine-shift</a>&gt;
-<a name="line-439"></a>
-<a name="line-440"></a>  2. /Polymorphic Delimited Continuations/, by Asai, Kameyama in /APLAS '07/:
-<a name="line-441"></a>     &lt;<a href="http://logic.cs.tsukuba.ac.jp/~kam/paper/aplas07.pdf">http://logic.cs.tsukuba.ac.jp/~kam/paper/aplas07.pdf</a>&gt;
-<a name="line-442"></a>
-<a name="line-443"></a>  3. /Introduction to programming with shift and reset/, by Kiselyov, Asai, in /CW2011/:
-<a name="line-444"></a>      &lt;<a href="http://okmij.org/ftp/continuations/index.html#tutorial">http://okmij.org/ftp/continuations/index.html#tutorial</a>&gt;
-<a name="line-445"></a>
-<a name="line-446"></a>  4. /CC-delcont: Delimited continuations and dynamically scoped variables/: &lt;<a href="http://hackage.haskell.org/package/CC-delcont">http://hackage.haskell.org/package/CC-delcont</a>&gt;
+<a name="line-437"></a><span class='hs-comment'>{- $refs
+<a name="line-438"></a>
+<a name="line-439"></a>  1. /Genuine shift\reset in Haskell98/, by Kiselyov, on /haskell-cafe/:
+<a name="line-440"></a>     &lt;<a href="http://okmij.org/ftp/continuations/implementations.html#genuine-shift">http://okmij.org/ftp/continuations/implementations.html#genuine-shift</a>&gt;
+<a name="line-441"></a>
+<a name="line-442"></a>  2. /Polymorphic Delimited Continuations/, by Asai, Kameyama in /APLAS '07/:
+<a name="line-443"></a>     &lt;<a href="http://logic.cs.tsukuba.ac.jp/~kam/paper/aplas07.pdf">http://logic.cs.tsukuba.ac.jp/~kam/paper/aplas07.pdf</a>&gt;
+<a name="line-444"></a>
+<a name="line-445"></a>  3. /Introduction to programming with shift and reset/, by Kiselyov, Asai, in /CW2011/:
+<a name="line-446"></a>      &lt;<a href="http://okmij.org/ftp/continuations/index.html#tutorial">http://okmij.org/ftp/continuations/index.html#tutorial</a>&gt;
 <a name="line-447"></a>
-<a name="line-448"></a>  5. /CC-delcont introduction/: &lt;<a href="http://www.haskell.org/haskellwiki/Library/CC-delcont#CC-delcont">http://www.haskell.org/haskellwiki/Library/CC-delcont#CC-delcont</a>&gt;
+<a name="line-448"></a>  4. /CC-delcont: Delimited continuations and dynamically scoped variables/: &lt;<a href="http://hackage.haskell.org/package/CC-delcont">http://hackage.haskell.org/package/CC-delcont</a>&gt;
 <a name="line-449"></a>
-<a name="line-450"></a>-}</span>
+<a name="line-450"></a>  5. /CC-delcont introduction/: &lt;<a href="http://www.haskell.org/haskellwiki/Library/CC-delcont#CC-delcont">http://www.haskell.org/haskellwiki/Library/CC-delcont#CC-delcont</a>&gt;
+<a name="line-451"></a>
+<a name="line-452"></a>-}</span>
 </pre></body>
 </html>

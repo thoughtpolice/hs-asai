@@ -60,7 +60,7 @@ etc.)
 Consider that we <code>shift</code> some computation and discard the continuation
 <code>k</code>. Then the answer type of the enclosing <code><code><a href="Control-Delimited.html#v:reset">reset</a></code></code> changes to the
 return type of the <code>shift</code>ed block. For example:
-</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>runDelim $ reset $ shift2 (\_ -&gt; ret &quot;hello&quot;) !&gt;&gt;= \r -&gt; ret (r + 1)
+</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>runDelim $ reset $ shift2 (\_ -&gt; returnI &quot;hello&quot;) !&gt;&gt;= \r -&gt; returnI (r + 1)
 </code></strong>&quot;hello&quot;
 </pre><p>Here, the initial answer type of the enclosing <code><code><a href="Control-Delimited.html#v:reset">reset</a></code></code> is initially
 <code>Int</code>, because the return of the reset is <code>Int</code>. However, we use
@@ -68,8 +68,8 @@ return type of the <code>shift</code>ed block. For example:
 delimited continuation, and simply returning a <code><code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code></code>.
 </p><p>On the other hand, it is also clear when the answer type is
 polymorphic and cannot be changed. Instead consider this example:
-</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>:t runDelim $ reset $ shift2 (\k -&gt; ret k) !&gt;&gt;= \r -&gt; ret (r + (1::Int))
-</code></strong>runDelim $ reset $ shift2 (\k -&gt; ret k) !&gt;&gt;= \r -&gt; ret (r + (1::Int))
+</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>:t runDelim $ reset $ shift2 (\k -&gt; returnI k) !&gt;&gt;= \r -&gt; returnI (r + (1::Int))
+</code></strong>runDelim $ reset $ shift2 (\k -&gt; returnI k) !&gt;&gt;= \r -&gt; returnI (r + (1::Int))
   :: Int -&gt; Delim a' a' Int
 </pre><p>Here, the answer type is <em>not</em> changed by the call to <code><code><a href="Control-Delimited.html#v:shift2">shift2</a></code></code>: the
 continuation k is not discarded, but returned. This 'carries' the
@@ -103,7 +103,7 @@ printf p = <code><a href="Control-Delimited.html#v:reset">reset</a></code> p
 </pre><p>Now we will define a type-safe formatter, that will 'plug' the
 value into our string properly:
 </p><pre>
-fmt to = <code><a href="Control-Delimited.html#v:shift2">shift2</a></code> (\k -&gt; <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> (k . to))
+fmt to = <code><a href="Control-Delimited.html#v:shift2">shift2</a></code> (\k -&gt; <code><a href="Data-Indexed-Functor.html#v:returnI">returnI</a></code> (k . to))
 </pre><p>When we call <code>fmt</code>, we will <em>abort</em> back to the enclosing <code><code><a href="Control-Delimited.html#v:reset">reset</a></code></code>,
 returning a function. The function is <code>k . to</code>, which will convert our
 value to a <code><code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code></code> and plug it into the enclosing hole that <code>fmt</code>
@@ -119,7 +119,7 @@ run = <code><a href="Control-Delimited.html#v:runDelim">runDelim</a></code>
 </pre><p>Now, we can write:
 </p><pre>
 test1 :: String
-test1 = run $ printf (<code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> &quot;hello world!&quot;)
+test1 = run $ printf (<code><a href="Data-Indexed-Functor.html#v:returnI">returnI</a></code> &quot;hello world!&quot;)
 </pre><p>And more interestingly:
 </p><pre>
 test2 :: String
@@ -129,9 +129,9 @@ concatenating the formatters with <code>^$</code> and passing arguments via <cod
 </p><pre>
 test3, test4 :: String
 
-test3 = run $ sprintf (<code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> &quot;goodbye &quot; ^$ fmt str ^$ <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> &quot;!&quot;) $$ &quot;world&quot;
+test3 = run $ sprintf (<code><a href="Data-Indexed-Functor.html#v:returnI">returnI</a></code> &quot;goodbye &quot; ^$ fmt str ^$ <code><a href="Data-Indexed-Functor.html#v:returnI">returnI</a></code> &quot;!&quot;) $$ &quot;world&quot;
 
-test4 = run $ sprintf (fmt str ^$ <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> &quot; = &quot; ^$ fmt int) $$ &quot;x&quot; $$ 3
+test4 = run $ sprintf (fmt str ^$ <code><a href="Data-Indexed-Functor.html#v:returnI">returnI</a></code> &quot; = &quot; ^$ fmt int) $$ &quot;x&quot; $$ 3
 </pre><p>It is an error to pass a value of an incorrect type to the
 corresponding formatter.
 </p><p>The full code is available in <code>examples/Printf.hs</code>.
@@ -162,15 +162,15 @@ data Coro a
   = Done
   | Resume a (forall s. <code><a href="Control-Delimited.html#t:Delim">Delim</a></code> s s (Coro a))
 
-walk_tree x = <code><a href="Control-Delimited.html#v:runDelim">runDelim</a></code> (walk_tree' x <code><a href="Control-Indexed-Monad.html#v:-33--62--62-">!&gt;&gt;</a></code> <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> Done)
+walk_tree x = <code><a href="Control-Delimited.html#v:runDelim">runDelim</a></code> (walk_tree' x <code><a href="Control-Indexed-Monad.html#v:-33--62--62-">!&gt;&gt;</a></code> <code><a href="Data-Indexed-Functor.html#v:returnI">returnI</a></code> Done)
 
-walk_tree' Leaf = <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> ()
+walk_tree' Leaf = <code><a href="Data-Indexed-Functor.html#v:returnI">returnI</a></code> ()
 walk_tree' (Node l r x) =
   walk_tree' l <code><a href="Control-Indexed-Monad.html#v:-33--62--62-">!&gt;&gt;</a></code>
   yield x      <code><a href="Control-Indexed-Monad.html#v:-33--62--62-">!&gt;&gt;</a></code>
   walk_tree' r
   where
-    yield n = <code><a href="Control-Delimited.html#v:shift2">shift2</a></code> (\k -&gt; <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> $ Resume n $ k ())
+    yield n = <code><a href="Control-Delimited.html#v:shift2">shift2</a></code> (\k -&gt; <code><a href="Data-Indexed-Functor.html#v:returnI">returnI</a></code> $ Resume n $ k ())
 
 walk1 :: Show a =&gt; Tree a -&gt; IO ()
 walk1 t = go (walk_tree t)
@@ -211,16 +211,18 @@ x &lt;- Left &quot;oh no!&quot;
 </pre><p>But we can never say:
 </p><pre>
 x &lt;- Left False
-</pre><p>because <code>e</code> is fixed to <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code>. Another example is that the <code><a href="Control-Monad-State.html#t:State">State</a></code> monad always has a fixed
+</pre><p>because <code>e</code> is fixed to <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code>. Another example is that the
+<code><a href="Control-Monad-State.html#t:State">State</a></code> monad always has a fixed state type, and
+it may never change over the course of the computation.
 </p><p>Indexed monads solve this problem by 'expanding' the kind of <code>m</code> in
 the <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Control-Monad.html#t:Monad">Monad</a></code> typeclass. The result is <code><a href="Control-Indexed-Monad.html#t:IxMonad">IxMonad</a></code>, which is defined as:
 </p><pre>
  class <code><a href="Control-Indexed-Monad.html#t:IxMonad">IxMonad</a></code> (m :: * -&gt; * -&gt; * -&gt; *) where
-   <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code>    :: t -&gt; m a a t
-   (<code><a href="Control-Indexed-Monad.html#v:-33--62--62--61-">!&gt;&gt;=</a></code>) :: m b g s -&gt; (s -&gt; m a b t) -&gt; m a g t
+   <code><a href="Data-Indexed-Functor.html#v:returnI">returnI</a></code> :: t -&gt; m a a t
+   (<code><a href="Control-Indexed-Monad.html#v:-33--62--62--61-">!&gt;&gt;=</a></code>)  :: m b g s -&gt; (s -&gt; m a b t) -&gt; m a g t
 </pre><p>Note the new type variables: these represent the input and output
-answer types of a delimited computation. We can see that <code><a href="Control-Indexed-Monad.html#v:ret">ret</a></code> is
-fully polymorphic in its answer type: a statement of <code>ret foo</code> in a
+answer types of a delimited computation. We can see that <code><a href="Data-Indexed-Functor.html#v:returnI">returnI</a></code> is
+fully polymorphic in its answer type: a statement of <code>returnI foo</code> in a
 <code><a href="Control-Delimited.html#t:Delim">Delim</a></code> simply does not change the answer type at all. Note the answer
 types present in <code><a href="Control-Indexed-Monad.html#t:-33--62--62--61-">!&gt;&gt;=</a></code>: we have an answer type
 of <code>a b</code> and <code>b g</code>, meaning we can get an overall answer type of <code>a
