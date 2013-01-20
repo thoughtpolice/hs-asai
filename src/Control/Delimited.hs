@@ -1,4 +1,5 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RankNTypes    #-}
+{-# LANGUAGE TypeOperators #-}
 -- |
 -- Module      : Control.Delimited
 -- Copyright   : (c) Oleg Kiselyov 2007-2013,
@@ -18,6 +19,8 @@
 module Control.Delimited
        ( -- * Delimited continuations
          Delim     -- :: * -> * -> * -> *
+       , (:~>)     -- :: * -> * -> *
+       , (:=>)     -- :: * -> * -> *
        , reset     -- :: Delim s t s -> Delim s' s' t
 
          -- ** A family of shift operators
@@ -77,7 +80,7 @@ import Control.Indexed.Monad
 --
 -- >>> :t runDelim (reset $ shift2 (\k -> returnI k) !>>= returnI . (+1))
 -- runDelim (reset $ shift2 (\k -> returnI k) !>>= returnI . (+1))
---   :: Num t => t -> Delim a' a' t
+--   :: Num t => t -> Delim s s t
 --
 -- >>> let f = runDelim (reset $ shift2 (\k -> returnI k) !>>= returnI . (+1))
 -- >>> runDelim (f 5)
@@ -89,6 +92,17 @@ import Control.Indexed.Monad
 -- same kind of type you would see in OchaCaml.)
 newtype Delim s t b
   = Delim { unDelim :: (b -> s) -> t }
+
+-- | This is a simple alias for a delimited continuation which is
+-- polymorphic in its answer type. This corresponds directly to the
+-- definition of @'shift2'@.
+type (:~>) a b = forall s. a -> Delim s s b
+
+-- | This is a simple alias for a delimited continuation which is
+-- polymorphic in its answer type, but where the continuation is
+-- monadic even in the input. This corresponds directly to the
+-- definition of @'shift3'@.
+type (:=>) a b = forall s. Delim s s a -> Delim s s b
 
 -- | Delimited continuations form an @'IxFunctor'@.
 instance IxFunctor Delim where
@@ -118,7 +132,7 @@ instance IxMonad Delim where
 --
 -- >>> runDelim (returnI 5)
 -- 5
-reset :: Delim s t s -> Delim a a t
+reset :: Delim s t s :~> t
 reset (Delim f) = Delim (\k -> k (f id))
 {-# INLINE reset #-}
 
@@ -203,7 +217,7 @@ shift1 f = shift0 (\k -> unDelim (f k) id)
 --
 -- >>> runDelim $ reset $ shift2 (\k -> (k !>=> k) 3) !>>= returnI . (+1)
 -- 5
-shift2 :: ((b -> forall a'. Delim a' a' s) -> Delim a t a) -> Delim s t b
+shift2 :: ((b :~> s) -> Delim a t a) -> Delim s t b
 shift2 f = shift1 (\k -> f (returnI . k))
 {-# INLINE shift2 #-}
 
@@ -226,7 +240,7 @@ shift2 f = shift1 (\k -> f (returnI . k))
 --
 -- >>> runDelim $ reset $ shift3 (\k -> k $ returnI 3) !>>= returnI . (+1)
 -- 4
-shift3 :: ((forall a'. Delim a' a' b -> Delim a' a' s) -> Delim a t a) -> Delim s t b
+shift3 :: ((b :=> s) -> Delim a t a) -> Delim s t b
 shift3 f = shift2 (\k -> f (!>>= k))
 {-# INLINE shift3 #-}
 
@@ -234,7 +248,7 @@ shift3 f = shift2 (\k -> f (!>>= k))
 
 -- The 'reverse' family of shift operators can also be defined:
 
-shift2' :: ((b -> forall a'. Delim a' a' s) -> Delim a t a) -> Delim s t b
+shift2' :: ((b :~> s) -> Delim a t a) -> Delim s t b
 shift2' f = shift3 (\k -> f (k . returnI))
 
 shift1' :: ((b -> s) -> Delim a t a) -> Delim s t b

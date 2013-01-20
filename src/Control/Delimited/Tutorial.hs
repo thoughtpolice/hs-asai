@@ -136,7 +136,7 @@ polymorphic and cannot be changed. Instead consider this example:
 
 >>> :t runDelim $ reset $ shift2 (\k -> returnI k) !>>= \r -> returnI (r + (1::Int))
 runDelim $ reset $ shift2 (\k -> returnI k) !>>= \r -> returnI (r + (1::Int))
-  :: Int -> Delim a' a' Int
+  :: Int -> Delim s s Int
 
 Here, the answer type is /not/ changed by the call to @'shift2'@: the
 continuation k is not discarded, but returned. This \'carries'\ the
