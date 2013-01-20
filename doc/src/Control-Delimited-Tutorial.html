@@ -145,7 +145,7 @@
 <a name="line-136"></a>
 <a name="line-137"></a>&gt;&gt;&gt; :t runDelim $ reset $ shift2 (\k -&gt; returnI k) !&gt;&gt;= \r -&gt; returnI (r + (1::Int))
 <a name="line-138"></a>runDelim $ reset $ shift2 (\k -&gt; returnI k) !&gt;&gt;= \r -&gt; returnI (r + (1::Int))
-<a name="line-139"></a>  :: Int -&gt; Delim a' a' Int
+<a name="line-139"></a>  :: Int -&gt; Delim s s Int
 <a name="line-140"></a>
 <a name="line-141"></a>Here, the answer type is /not/ changed by the call to @'shift2'@: the
 <a name="line-142"></a>continuation k is not discarded, but returned. This \'carries'\ the

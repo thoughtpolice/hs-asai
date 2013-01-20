@@ -70,7 +70,7 @@ delimited continuation, and simply returning a <code><code><a href="/usr/local/s
 polymorphic and cannot be changed. Instead consider this example:
 </p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>:t runDelim $ reset $ shift2 (\k -&gt; returnI k) !&gt;&gt;= \r -&gt; returnI (r + (1::Int))
 </code></strong>runDelim $ reset $ shift2 (\k -&gt; returnI k) !&gt;&gt;= \r -&gt; returnI (r + (1::Int))
-  :: Int -&gt; Delim a' a' Int
+  :: Int -&gt; Delim s s Int
 </pre><p>Here, the answer type is <em>not</em> changed by the call to <code><code><a href="Control-Delimited.html#v:shift2">shift2</a></code></code>: the
 continuation k is not discarded, but returned. This 'carries' the
 answer type variables with the value, enforcing the input and output
