@@ -1,6 +1,6 @@
 -- |
 -- Module      : Control.Indexed.Prelude
--- Copyright   : (c) Oleg Kiselyov 2007-2012, (c) Austin Seipp 2012
+-- Copyright   : (c) Oleg Kiselyov 2007-2013, (c) Austin Seipp 2012-2013
 -- License     : MIT
 --
 -- Maintainer  : mad.one@gmail.com
@@ -15,8 +15,8 @@
 module Control.Indexed.Prelude
        ( -- * Redefined prelude operators
          (>>=)  -- :: IxMonad m => m t u a -> (a -> m s t b) -> m s u b
-       , (>>)   -- :: IxMonad m => m t u a -> m s t b -> m s u b
        , (=<<)  -- :: IxMonad m => (a -> m s t b) -> m t u a -> m s u b
+       , (>>)   -- :: IxMonad m => m s t a -> m t u b -> m s u b
        , return -- :: IxMonad m => a -> m s s a
        , fail   -- :: IxMonad m => Prelude.String -> m s s a
 
@@ -27,22 +27,27 @@ module Control.Indexed.Prelude
 import Prelude hiding (return, fail, (>>=), (=<<), (>>))
 import Control.Delimited
 
--- | Indexed Prelude 'Prelude.>>='.
+-- | Indexed Prelude @'Prelude.>>='@.
 (>>=) :: IxMonad m => m t u a -> (a -> m s t b) -> m s u b
 (>>=)    = (!>>=)
+{-# INLINE (>>=) #-}
 
--- | Indexed Prelude 'Prelude.>>'.
-(>>) :: IxMonad m => m t u a -> m s t b -> m s u b
-(>>)     = (!>>)
-
--- | Indexed Prelude 'Prelude.=<<'.
+-- | Indexed Prelude @'Prelude.=<<'@.
 (=<<) :: IxMonad m => (a -> m s t b) -> m t u a -> m s u b
 (=<<)    = (=<<!)
+{-# INLINE (=<<) #-}
 
--- | Indexed Prelude 'Prelude.return'.
+-- | Indexed Prelude @'Prelude.>>'@.
+(>>) :: IxMonad m => m s t a -> m t u b -> m s u b
+(>>)     = (!>>)
+{-# INLINE (>>) #-}
+
+-- | Indexed Prelude @'Prelude.return'@.
 return :: IxMonad m => a -> m s s a
-return x = ret x
+return x = returnI x
+{-# INLINE return #-}
 
--- | Indexed Prelude 'Prelude.fail'.
+-- | Indexed Prelude @'Prelude.fail'@.
 fail :: IxMonad m => Prelude.String -> m s s a
-fail   x = fail' x
+fail   x = failI x
+{-# INLINE fail #-}

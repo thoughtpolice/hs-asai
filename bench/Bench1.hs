@@ -8,13 +8,13 @@ main :: IO ()
 main = defaultMain
        [ -- Simple answer-type modification
          bench "ans1" $ nf id $ runDelim $ reset
-         (shift1 (\_ -> ret "hello") !>>= \r ->
-           ret (r + 1 :: Int))
+         (shift1 (\_ -> returnI "hello") !>>= \r ->
+           returnI (r + 1 :: Int))
 
          -- Capturing the continuation
        , bench "ans2" $ nf id $ runDelim $
-         (reset ( shift1 ret !>>= \x ->
-                   ret (x + 1)
+         (reset ( shift1 returnI !>>= \x ->
+                   returnI (x + 1)
                  ) !>>= \r ->
-         ret (r (5 :: Int)))
+         returnI (r (5 :: Int)))
        ]

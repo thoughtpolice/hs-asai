@@ -2,7 +2,7 @@
 {-# LANGUAGE RebindableSyntax, NoImplicitPrelude #-}
 -- |
 -- Module      : Control.Delimited.Tutorial
--- Copyright   : (c) Oleg Kiselyov 2007-2012, (c) Austin Seipp 2012
+-- Copyright   : (c) Oleg Kiselyov 2007-2013, (c) Austin Seipp 2012-2013
 -- License     : MIT
 --
 -- Maintainer  : mad.one@gmail.com
@@ -123,7 +123,7 @@ Consider that we @shift@ some computation and discard the continuation
 @k@. Then the answer type of the enclosing @'reset'@ changes to the
 return type of the @shift@ed block. For example:
 
->>> runDelim $ reset $ shift2 (\_ -> ret "hello") !>>= \r -> ret (r + 1)
+>>> runDelim $ reset $ shift2 (\_ -> returnI "hello") !>>= \r -> returnI (r + 1)
 "hello"
 
 Here, the initial answer type of the enclosing @'reset'@ is initially
@@ -134,8 +134,8 @@ delimited continuation, and simply returning a @'String'@.
 On the other hand, it is also clear when the answer type is
 polymorphic and cannot be changed. Instead consider this example:
 
->>> :t runDelim $ reset $ shift2 (\k -> ret k) !>>= \r -> ret (r + (1::Int))
-runDelim $ reset $ shift2 (\k -> ret k) !>>= \r -> ret (r + (1::Int))
+>>> :t runDelim $ reset $ shift2 (\k -> returnI k) !>>= \r -> returnI (r + (1::Int))
+runDelim $ reset $ shift2 (\k -> returnI k) !>>= \r -> returnI (r + (1::Int))
   :: Int -> Delim a' a' Int
 
 Here, the answer type is /not/ changed by the call to @'shift2'@: the
@@ -188,7 +188,7 @@ Now we will define a type-safe formatter, that will \'plug\' the
 value into our string properly:
 
 @
-fmt to = 'shift2' (\\k -> 'ret' (k . to))
+fmt to = 'shift2' (\\k -> 'returnI' (k . to))
 @
 
 When we call @fmt@, we will /abort/ back to the enclosing @'reset'@,
@@ -210,7 +210,7 @@ Now, we can write:
 
 @
 test1 :: String
-test1 = run $ printf ('ret' \"hello world!\")
+test1 = run $ printf ('returnI' \"hello world!\")
 @
 
 And more interestingly:
@@ -226,9 +226,9 @@ concatenating the formatters with @^$@ and passing arguments via @$$@:
 @
 test3, test4 :: String
 
-test3 = run $ sprintf ('ret' \"goodbye \" ^$ fmt str ^$ 'ret' \"!\") $$ \"world\"
+test3 = run $ sprintf ('returnI' \"goodbye \" ^$ fmt str ^$ 'returnI' \"!\") $$ \"world\"
 
-test4 = run $ sprintf (fmt str ^$ 'ret' \" = \" ^$ fmt int) $$ \"x\" $$ 3
+test4 = run $ sprintf (fmt str ^$ 'returnI' \" = \" ^$ fmt int) $$ \"x\" $$ 3
 @
 
 It is an error to pass a value of an incorrect type to the
@@ -267,15 +267,15 @@ data Coro a
   = Done
   | Resume a (forall s. 'Delim' s s (Coro a))
 
-walk_tree x = 'runDelim' (walk_tree' x '!>>' 'ret' Done)
+walk_tree x = 'runDelim' (walk_tree' x '!>>' 'returnI' Done)
 
-walk_tree' Leaf = 'ret' ()
+walk_tree' Leaf = 'returnI' ()
 walk_tree' (Node l r x) =
   walk_tree' l '!>>'
   yield x      '!>>'
   walk_tree' r
   where
-    yield n = 'shift2' (\\k -> 'ret' $ Resume n $ k ())
+    yield n = 'shift2' (\\k -> 'returnI' $ Resume n $ k ())
 
 walk1 :: Show a => Tree a -> IO ()
 walk1 t = go (walk_tree t)
@@ -351,13 +351,13 @@ the 'Monad' typeclass. The result is 'IxMonad', which is defined as:
 
 @
  class 'IxMonad' (m :: * -> * -> * -> *) where
-   'ret'    :: t -> m a a t
-   ('!>>=') :: m b g s -> (s -> m a b t) -> m a g t
+   'returnI' :: t -> m a a t
+   ('!>>=')  :: m b g s -> (s -> m a b t) -> m a g t
 @
 
 Note the new type variables: these represent the input and output
-answer types of a delimited computation. We can see that 'ret' is
-fully polymorphic in its answer type: a statement of @ret foo@ in a
+answer types of a delimited computation. We can see that 'returnI' is
+fully polymorphic in its answer type: a statement of @returnI foo@ in a
 'Delim' simply does not change the answer type at all. Note the answer
 types present in 'Control.Indexed.Monad.!>>=': we have an answer type
 of @a b@ and @b g@, meaning we can get an overall answer type of @a

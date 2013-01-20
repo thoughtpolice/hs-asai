@@ -14,9 +14,9 @@ homepage:            http://thoughtpolice.github.com/hs-asai
 bug-reports:         http://github.com/thoughtpolice/hs-asai/issues
 license:             MIT
 license-file:        LICENSE.txt
-copyright:           Copyright (c) Oleg Kiselyov 2007-2012,
-                               (c) Austin Seipp  2012,
-                               (c) Leon P Smith  2012
+copyright:           Copyright (c) Oleg Kiselyov 2007-2013,
+                               (c) Austin Seipp  2012-2013,
+                               (c) Leon P Smith  2012-2013
 author:              Oleg Kiselyov <oleg@pobox.com>
 maintainer:          Austin Seipp <mad.one@gmail.com>
 category:            Control
@@ -34,10 +34,14 @@ source-repository head
 
 library
   exposed-modules:
-    Control.Delimited
-    Control.Delimited.Tutorial
+    -- Indexed library
+    Data.Indexed.Functor
+    Control.Indexed.Applicative
     Control.Indexed.Monad
     Control.Indexed.Prelude
+    -- Delimited continuations
+    Control.Delimited
+    Control.Delimited.Tutorial
   build-depends:
     base >= 4
 

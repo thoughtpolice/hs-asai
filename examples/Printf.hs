@@ -15,6 +15,7 @@ infixl 1 $$
 e1 ^$ e2 = liftIxM2 (++) e1 e2
 
 fmt to = shift2 (\k -> return (k . to))
+ret = returnI
 sprintf p = reset p
 run = runDelim
 

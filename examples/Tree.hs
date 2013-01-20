@@ -25,15 +25,15 @@ data Coro a
   = Done
   | Resume a (forall s. Delim s s (Coro a))
 
-walk_tree x = runDelim (walk_tree' x !>> ret Done)
+walk_tree x = runDelim (walk_tree' x !>> returnI Done)
 
-walk_tree' Leaf = ret ()
+walk_tree' Leaf = returnI ()
 walk_tree' (Node l r x) =
   walk_tree' l !>>
   yield x      !>>
   walk_tree' r
   where
-    yield n = shift2 (\k -> ret $ Resume n $ k ())
+    yield n = shift2 (\k -> returnI $ Resume n $ k ())
 
 walk1 :: Show a => Tree a -> IO ()
 walk1 t = go (walk_tree t)
