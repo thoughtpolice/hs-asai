@@ -64,32 +64,32 @@ import Control.Indexed.Monad
 -- Consider a term like:
 --
 -- @
--- 'reset' $ [...] '!>>=' \\r -> 'returnI' $ r ++ \" world\"
+-- 'reset' $ [...] '!>>=' \\r -> 'returnI' (r ++ \" world\")
 -- @
 --
 -- Here, the answer type of the enclosing @'reset'@ is @'String'@. If
 -- the hole (specified by @[...]@) does not have a @shift@ operator,
 -- or the @shift@ operator does not change the answer type, then the
--- type of the hole is answer type polymorphic: the hole cannot change
--- the answer type of the enclosing 'reset'.
+-- answer type of the hole is polymorphic: the hole cannot change the
+-- answer type of the enclosing 'reset'.
 --
--- To make this clearer, consider using a @shift@ operator to return
--- the delimited continuation to the outer @'reset'@ (which does not
--- modify the answer type, since we can only invoke @k@ to return an
--- 'Int'):
+-- To make this clear, consider using a @shift@ operator to deliver
+-- the delimited continuation to the outer @'reset'@. Doing this means
+-- you cannot modify the answer type: the returned continuation may
+-- only return a value whose type is that of the enclosing @'reset'@
+-- (because all it can do is fill in the hole):
 --
--- >>> :t runDelim (reset $ shift2 (\k -> returnI k) !>>= returnI . (+1))
--- runDelim (reset $ shift2 (\k -> returnI k) !>>= returnI . (+1))
---   :: Num t => t -> Delim s s t
---
--- >>> let f = runDelim (reset $ shift2 (\k -> returnI k) !>>= returnI . (+1))
--- >>> runDelim (f 5)
+-- >>> let f :: Int -> Int; f = (+1)
+-- >>> let k = runDelim $ reset (shift2 returnI !>>= returnI . f)
+-- >>> :t k
+-- k :: Int -> Delim s s Int
+-- >>> runDelim (k 5)
 -- 6
 --
--- Note how the quantified variable @a'@ is both the input and output
--- answer type of @k@: thus, it cannot change the answer type (here we
--- use @'shift2'@ which features a rank-2 type, perfectly matching the
--- same kind of type you would see in OchaCaml.)
+-- Here, the return type of the overall @'reset'@ is @Int@. Note how
+-- the quantified variable @s@ is both the input and output answer
+-- type of @k@, and the input and return are fixed to @Int@: thus, @k@
+-- cannot change the answer type of @'reset'@.
 newtype Delim s t b
   = Delim { unDelim :: (b -> s) -> t }
 
