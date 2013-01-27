@@ -24,26 +24,27 @@ window.onload = function () {pageLoad();setSynopsis("mini_Control-Delimited.html
  answer type,) then the term is <em>polymorphic</em> in the answer type.
 </p><p>Consider a term like:
 </p><pre>
- <code><a href="Control-Delimited.html#v:reset">reset</a></code> $ [...] <code><a href="Control-Indexed-Monad.html#v:-33--62--62--61-">!&gt;&gt;=</a></code> \r -&gt; <code><a href="Data-Indexed-Functor.html#v:returnI">returnI</a></code> $ r ++ &quot; world&quot;
+ <code><a href="Control-Delimited.html#v:reset">reset</a></code> $ [...] <code><a href="Control-Indexed-Monad.html#v:-33--62--62--61-">!&gt;&gt;=</a></code> \r -&gt; <code><a href="Data-Indexed-Functor.html#v:returnI">returnI</a></code> (r ++ &quot; world&quot;)
 </pre><p>Here, the answer type of the enclosing <code><code><a href="Control-Delimited.html#v:reset">reset</a></code></code> is <code><code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a></code></code>. If
  the hole (specified by <code>[...]</code>) does not have a <code>shift</code> operator,
  or the <code>shift</code> operator does not change the answer type, then the
- type of the hole is answer type polymorphic: the hole cannot change
- the answer type of the enclosing <code><a href="Control-Delimited.html#v:reset">reset</a></code>.
-</p><p>To make this clearer, consider using a <code>shift</code> operator to return
- the delimited continuation to the outer <code><code><a href="Control-Delimited.html#v:reset">reset</a></code></code> (which does not
- modify the answer type, since we can only invoke <code>k</code> to return an
- <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Int.html#t:Int">Int</a></code>):
-</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>:t runDelim (reset $ shift2 (\k -&gt; returnI k) !&gt;&gt;= returnI . (+1))
-</code></strong>runDelim (reset $ shift2 (\k -&gt; returnI k) !&gt;&gt;= returnI . (+1))
-  :: Num t =&gt; t -&gt; Delim s s t
-</pre><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>let f = runDelim (reset $ shift2 (\k -&gt; returnI k) !&gt;&gt;= returnI . (+1))
-</code></strong><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>runDelim (f 5)
+ answer type of the hole is polymorphic: the hole cannot change the
+ answer type of the enclosing <code><a href="Control-Delimited.html#v:reset">reset</a></code>.
+</p><p>To make this clear, consider using a <code>shift</code> operator to deliver
+ the delimited continuation to the outer <code><code><a href="Control-Delimited.html#v:reset">reset</a></code></code>. Doing this means
+ you cannot modify the answer type: the returned continuation may
+ only return a value whose type is that of the enclosing <code><code><a href="Control-Delimited.html#v:reset">reset</a></code></code>
+ (because all it can do is fill in the hole):
+</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>let f :: Int -&gt; Int; f = (+1)
+</code></strong><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>let k = runDelim $ reset (shift2 returnI !&gt;&gt;= returnI . f)
+</code></strong><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>:t k
+</code></strong>k :: Int -&gt; Delim s s Int
+<code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>runDelim (k 5)
 </code></strong>6
-</pre><p>Note how the quantified variable <code>a'</code> is both the input and output
- answer type of <code>k</code>: thus, it cannot change the answer type (here we
- use <code><code><a href="Control-Delimited.html#v:shift2">shift2</a></code></code> which features a rank-2 type, perfectly matching the
- same kind of type you would see in OchaCaml.)
+</pre><p>Here, the return type of the overall <code><code><a href="Control-Delimited.html#v:reset">reset</a></code></code> is <code>Int</code>. Note how
+ the quantified variable <code>s</code> is both the input and output answer
+ type of <code>k</code>, and the input and return are fixed to <code>Int</code>: thus, <code>k</code>
+ cannot change the answer type of <code><code><a href="Control-Delimited.html#v:reset">reset</a></code></code>.
 </p></div><div class="subs instances"><p id="control.i:Delim" class="caption collapser" onclick="toggleSection('i:Delim')">Instances</p><div id="section.i:Delim" class="show"><table><tr><td class="src"><a href="Data-Indexed-Functor.html#t:IxFunctor">IxFunctor</a> <a href="Control-Delimited.html#t:Delim">Delim</a></td><td class="doc"><p>Delimited continuations form an <code><code><a href="Data-Indexed-Functor.html#t:IxFunctor">IxFunctor</a></code></code>.
 </p></td></tr><tr><td class="src"><a href="Data-Indexed-Functor.html#t:IxPointed">IxPointed</a> <a href="Control-Delimited.html#t:Delim">Delim</a></td><td class="doc"><p>Delimited continuations form an <code><code><a href="Data-Indexed-Functor.html#t:IxPointed">IxPointed</a></code></code>.
 </p></td></tr><tr><td class="src"><a href="Control-Indexed-Applicative.html#t:IxApplicative">IxApplicative</a> <a href="Control-Delimited.html#t:Delim">Delim</a></td><td class="doc"><p>Delimited continuations form an <code><code><a href="Control-Indexed-Applicative.html#t:IxApplicative">IxApplicative</a></code></code>.

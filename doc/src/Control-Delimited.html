@@ -73,32 +73,32 @@
 <a name="line-64"></a><a name="Delim"></a><span class='hs-comment'>-- Consider a term like:</span>
 <a name="line-65"></a><a name="Delim"></a><span class='hs-comment'>--</span>
 <a name="line-66"></a><a name="Delim"></a><span class='hs-comment'>-- @</span>
-<a name="line-67"></a><a name="Delim"></a><span class='hs-comment'>-- 'reset' $ [...] '!&gt;&gt;=' \\r -&gt; 'returnI' $ r ++ \" world\"</span>
+<a name="line-67"></a><a name="Delim"></a><span class='hs-comment'>-- 'reset' $ [...] '!&gt;&gt;=' \\r -&gt; 'returnI' (r ++ \" world\")</span>
 <a name="line-68"></a><a name="Delim"></a><span class='hs-comment'>-- @</span>
 <a name="line-69"></a><a name="Delim"></a><span class='hs-comment'>--</span>
 <a name="line-70"></a><a name="Delim"></a><span class='hs-comment'>-- Here, the answer type of the enclosing @'reset'@ is @'String'@. If</span>
 <a name="line-71"></a><a name="Delim"></a><span class='hs-comment'>-- the hole (specified by @[...]@) does not have a @shift@ operator,</span>
 <a name="line-72"></a><a name="Delim"></a><span class='hs-comment'>-- or the @shift@ operator does not change the answer type, then the</span>
-<a name="line-73"></a><a name="Delim"></a><span class='hs-comment'>-- type of the hole is answer type polymorphic: the hole cannot change</span>
-<a name="line-74"></a><a name="Delim"></a><span class='hs-comment'>-- the answer type of the enclosing 'reset'.</span>
+<a name="line-73"></a><a name="Delim"></a><span class='hs-comment'>-- answer type of the hole is polymorphic: the hole cannot change the</span>
+<a name="line-74"></a><a name="Delim"></a><span class='hs-comment'>-- answer type of the enclosing 'reset'.</span>
 <a name="line-75"></a><a name="Delim"></a><span class='hs-comment'>--</span>
-<a name="line-76"></a><a name="Delim"></a><span class='hs-comment'>-- To make this clearer, consider using a @shift@ operator to return</span>
-<a name="line-77"></a><a name="Delim"></a><span class='hs-comment'>-- the delimited continuation to the outer @'reset'@ (which does not</span>
-<a name="line-78"></a><a name="Delim"></a><span class='hs-comment'>-- modify the answer type, since we can only invoke @k@ to return an</span>
-<a name="line-79"></a><a name="Delim"></a><span class='hs-comment'>-- 'Int'):</span>
-<a name="line-80"></a><a name="Delim"></a><span class='hs-comment'>--</span>
-<a name="line-81"></a><a name="Delim"></a><span class='hs-comment'>-- &gt;&gt;&gt; :t runDelim (reset $ shift2 (\k -&gt; returnI k) !&gt;&gt;= returnI . (+1))</span>
-<a name="line-82"></a><a name="Delim"></a><span class='hs-comment'>-- runDelim (reset $ shift2 (\k -&gt; returnI k) !&gt;&gt;= returnI . (+1))</span>
-<a name="line-83"></a><a name="Delim"></a><span class='hs-comment'>--   :: Num t =&gt; t -&gt; Delim s s t</span>
-<a name="line-84"></a><a name="Delim"></a><span class='hs-comment'>--</span>
-<a name="line-85"></a><a name="Delim"></a><span class='hs-comment'>-- &gt;&gt;&gt; let f = runDelim (reset $ shift2 (\k -&gt; returnI k) !&gt;&gt;= returnI . (+1))</span>
-<a name="line-86"></a><a name="Delim"></a><span class='hs-comment'>-- &gt;&gt;&gt; runDelim (f 5)</span>
+<a name="line-76"></a><a name="Delim"></a><span class='hs-comment'>-- To make this clear, consider using a @shift@ operator to deliver</span>
+<a name="line-77"></a><a name="Delim"></a><span class='hs-comment'>-- the delimited continuation to the outer @'reset'@. Doing this means</span>
+<a name="line-78"></a><a name="Delim"></a><span class='hs-comment'>-- you cannot modify the answer type: the returned continuation may</span>
+<a name="line-79"></a><a name="Delim"></a><span class='hs-comment'>-- only return a value whose type is that of the enclosing @'reset'@</span>
+<a name="line-80"></a><a name="Delim"></a><span class='hs-comment'>-- (because all it can do is fill in the hole):</span>
+<a name="line-81"></a><a name="Delim"></a><span class='hs-comment'>--</span>
+<a name="line-82"></a><a name="Delim"></a><span class='hs-comment'>-- &gt;&gt;&gt; let f :: Int -&gt; Int; f = (+1)</span>
+<a name="line-83"></a><a name="Delim"></a><span class='hs-comment'>-- &gt;&gt;&gt; let k = runDelim $ reset (shift2 returnI !&gt;&gt;= returnI . f)</span>
+<a name="line-84"></a><a name="Delim"></a><span class='hs-comment'>-- &gt;&gt;&gt; :t k</span>
+<a name="line-85"></a><a name="Delim"></a><span class='hs-comment'>-- k :: Int -&gt; Delim s s Int</span>
+<a name="line-86"></a><a name="Delim"></a><span class='hs-comment'>-- &gt;&gt;&gt; runDelim (k 5)</span>
 <a name="line-87"></a><a name="Delim"></a><span class='hs-comment'>-- 6</span>
 <a name="line-88"></a><a name="Delim"></a><span class='hs-comment'>--</span>
-<a name="line-89"></a><a name="Delim"></a><span class='hs-comment'>-- Note how the quantified variable @a'@ is both the input and output</span>
-<a name="line-90"></a><a name="Delim"></a><span class='hs-comment'>-- answer type of @k@: thus, it cannot change the answer type (here we</span>
-<a name="line-91"></a><a name="Delim"></a><span class='hs-comment'>-- use @'shift2'@ which features a rank-2 type, perfectly matching the</span>
-<a name="line-92"></a><a name="Delim"></a><span class='hs-comment'>-- same kind of type you would see in OchaCaml.)</span>
+<a name="line-89"></a><a name="Delim"></a><span class='hs-comment'>-- Here, the return type of the overall @'reset'@ is @Int@. Note how</span>
+<a name="line-90"></a><a name="Delim"></a><span class='hs-comment'>-- the quantified variable @s@ is both the input and output answer</span>
+<a name="line-91"></a><a name="Delim"></a><span class='hs-comment'>-- type of @k@, and the input and return are fixed to @Int@: thus, @k@</span>
+<a name="line-92"></a><a name="Delim"></a><span class='hs-comment'>-- cannot change the answer type of @'reset'@.</span>
 <a name="line-93"></a><a name="Delim"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>Delim</span> <span class='hs-varid'>s</span> <span class='hs-varid'>t</span> <span class='hs-varid'>b</span>
 <a name="line-94"></a>  <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Delim</span> <span class='hs-layout'>{</span> <span class='hs-varid'>unDelim</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-varid'>b</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>s</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>t</span> <span class='hs-layout'>}</span>
 <a name="line-95"></a>
